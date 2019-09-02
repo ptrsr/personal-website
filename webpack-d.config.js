@@ -1,21 +1,17 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
 
 module.exports = {
     entry: './src/index.js',
-    mode: 'production',
+    mode: 'development',
 
     output: {
-        filename: '[name].[contenthash].js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist')
     },
 
     optimization: {
-        minimizer: [new UglifyJsPlugin()],
-        usedExports: true,
         runtimeChunk: 'single',
         splitChunks: {
             chunks: 'all',
@@ -34,9 +30,13 @@ module.exports = {
         },
     },
 
+    devtool: 'inline-source-map',
+    devServer: {
+        contentBase: './dist'
+    },
+
     plugins: [
         new HtmlWebpackPlugin({ hash: true, template: './src/index.html' }),
-        new webpack.HashedModuleIdsPlugin(),
         new CleanWebpackPlugin()
     ],
 
