@@ -1,5 +1,8 @@
-import * as THREE from 'three';
 import './style.css';
+import globeAnimation from './globe-animation/globe-animation.js';
 
-console.log("ruud")
-console.log(THREE)
+
+const canvas = document.getElementById('globe');
+const globe = new globeAnimation(canvas);
+
+console.log(globe);
