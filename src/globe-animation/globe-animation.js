@@ -23,7 +23,6 @@ export default class GlobeAnimation {
         const globe = new Globe();
         this.scene.add(globe);
 
-        globe.setPlaneSize(1.1);
         globe.setSphereSize(1)
 
         this.renderer = new WebGLRenderer({
@@ -36,14 +35,13 @@ export default class GlobeAnimation {
 
         const clock = new Clock(true);
         this.loop(clock);
-
-        t
     }
 
 
     loop = (clock) => {
         const delta = clock.getDelta();
-        this.camera.position.y = Math.sin(clock.elapsedTime) * 2;
+        this.camera.position.y = Math.sin(clock.elapsedTime);
+
         this.renderer.render(this.scene, this.camera);
         this.objc.rotateY(delta);
         requestAnimationFrame(this.loop.bind(null, clock));

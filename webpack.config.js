@@ -1,8 +1,10 @@
 const path = require('path');
+const webpack = require('webpack');
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './src/index.js',
@@ -37,7 +39,11 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({ hash: true, template: './src/index.html' }),
         new webpack.HashedModuleIdsPlugin(),
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        new CopyWebpackPlugin([ 
+            { from:'CNAME' },
+            { from:'public', to:'assets' },
+        ]) 
     ],
 
     module: {

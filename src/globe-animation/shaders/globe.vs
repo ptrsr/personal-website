@@ -3,11 +3,10 @@ precision highp float;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-
+uniform mat4 invViewMatrix;
 
 uniform vec3 cameraPosition;
 
-uniform mat4 invViewMatrix;
 uniform float size;
 
 attribute vec3 vertexPos;

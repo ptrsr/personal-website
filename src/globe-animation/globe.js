@@ -1,4 +1,4 @@
-import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, Vector3 } from "three";
+import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader } from "three";
 
 import vert from './shaders/globe.vs'
 import frag from './shaders/globe.fs'
@@ -16,12 +16,17 @@ export default class Globe extends Mesh {
         );
         geometry.setIndex([ 0, 1, 2, 1, 3, 2 ]);
 
+        const dayMap1 = new TextureLoader().load('assets/earth/day-map1.jpg');
+        const dayMap2 = new TextureLoader().load('assets/earth/day-map2.jpg');
+
         // globe shader
         const material = new RawShaderMaterial({
             uniforms: { 
                 invViewMatrix: { value: new Matrix4() },
                 size: { value: 1 },
-                pSize: { value: 1.1 }
+                dayMap1: { type: 't', value: dayMap1 },
+                dayMap2: { type: 't', value: dayMap2 }
+
             },
             vertexShader: vert,
             fragmentShader: frag
@@ -33,10 +38,6 @@ export default class Globe extends Mesh {
         this.onBeforeRender = (renderer, scene, camera, geometry, material) => {
             material.uniforms.invViewMatrix.value = camera.matrixWorld;
         }
-    }
-
-    setPlaneSize = (size) => {
-        this.material.uniforms.pSize.value = size;
     }
 
     setSphereSize = (size) => {
