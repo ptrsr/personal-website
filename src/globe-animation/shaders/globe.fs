@@ -16,19 +16,21 @@ bool Sphere(vec3 ray, vec3 pos, float radius, out vec2 dist);
 vec3 MapUV(vec3 normal);
 
 void main() {
-    vec3 ray = normalize(worldPos - cameraPosition);
+    vec3 ray = normalize(cameraPosition - worldPos);
 
     vec2 test;
     if (Sphere(ray, cameraPosition, size, test)) {
 
-        vec3 iPos = cameraPosition + ray * test.x;
-        vec3 iNormal = normalize(iPos - modelMatrix[3].xyz);
+        vec3 iPos = (ray * test.x);
+        vec3 iNormal = normalize(cameraPosition - iPos);
 
         vec3 color = MapUV(iNormal);
 
-        vec3 test = normalize(cameraPosition - modelMatrix[3].xyz);
+        float lit = max(0.0, dot(iNormal, light));
 
-        gl_FragColor = vec4(cameraPosition, 1);
+
+        gl_FragColor = vec4(color, 1);
+
         return;
     }
 
@@ -73,21 +75,19 @@ vec3 MapUV(vec3 normal) {
         0.5 - asin(normal.x) / pi
     );
 
-    // // divide world uv for 2 textures
-    // vec4 fUV = vec4(
-    //     vec2(-uv.x * 2.0, uv.y),
-    //     vec2((-uv.x - 0.5) * 2.0, uv.y)
-    // );
+    // divide world uv for 2 textures
+    vec4 fUV = vec4(
+        vec2(uv.x * 2.0, uv.y),
+        vec2((uv.x - 0.5) * 2.0, uv.y)
+    );
 
-    // // texture mapping
-    // vec4 map = uv.x > 0.5 ?
-    //   texture2D(dayMap1, uv.yx) :
-    //   texture2D(dayMap2, uv.yx);
-
-    vec4 map = vec4(normal, 1);
+    // texture mapping
+    vec4 map = uv.x > 0.5 ?
+      texture2D(dayMap1, fUV.xy) :
+      texture2D(dayMap2, fUV.zw);
 
     // lighting of earth
-    float lit = max(0.0, dot(normal, light));
+    //float lit = max(0.0, dot(normal, light));
 
-    return map.xyz * lit;
+    return map.xyz;
 }
