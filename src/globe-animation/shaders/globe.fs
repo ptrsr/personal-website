@@ -1,9 +1,10 @@
-precision mediump float;
+precision highp float;
 
 #define light -normalize(vec3(1))
 
 uniform vec3 cameraPosition;
 varying vec3 worldPos;
+uniform float size;
 
 bool Sphere(vec3 ray, vec3 pos, float radius, out vec2 dist);
 
@@ -11,7 +12,7 @@ void main() {
     vec3 ray = normalize(worldPos - cameraPosition);
 
     vec2 test;
-    if (Sphere(ray, cameraPosition, 95.0, test)) {
+    if (Sphere(ray, cameraPosition, size, test)) {
 
         vec3 iPos = (ray * test.x);
         vec3 iNormal = normalize(iPos - cameraPosition);
