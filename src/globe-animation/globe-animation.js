@@ -23,28 +23,38 @@ export default class GlobeAnimation {
         const globe = new Globe();
         this.scene.add(globe);
 
-        globe.setSphereSize(1)
+        globe.setSphereSize(1);
 
-        this.renderer = new WebGLRenderer({
-            canvas,
-            antialias: true,
-        });
+        this.renderer = new WebGLRenderer({ canvas });
+
+        // this.renderer.antialias = true;
+
         this.renderer.setSize(canvas.scrollWidth, canvas.scrollHeight);
         this.renderer.setClearColor(new Color('black'));
         this.renderer.setPixelRatio( window.devicePixelRatio );
 
         const clock = new Clock(true);
-        this.loop(clock);
+
+        const counter = document.getElementById('fps');
+
+        //this.loop(clock, counter);
+        setTimeout(this.loop, 1, clock, counter);
     }
 
 
-    loop = (clock) => {
+    loop = (clock, counter) => {
         const delta = clock.getDelta();
-        this.camera.position.y = Math.sin(clock.elapsedTime);
+        // this.camera.position.y = Math.sin(clock.elapsedTime);
+
+        //counter.innerHTML = 1 / delta;
+        this.objc.rotateY(delta / 3.0);
 
         this.renderer.render(this.scene, this.camera);
-        this.objc.rotateY(delta);
-        requestAnimationFrame(this.loop.bind(null, clock));
+
+
+        // setTimeout(this.loop, 1, clock, counter);
+
+        requestAnimationFrame(this.loop.bind(null, clock, counter));
     }
 
 

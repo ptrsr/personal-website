@@ -34,7 +34,7 @@ void main() {
         return;
     }
 
-    gl_FragColor = vec4(ray, 1);
+    gl_FragColor = vec4(vec3(0), 1);
 }
 
 bool Sphere(vec3 ray, vec3 pos, float radius, out vec2 dist) {
@@ -71,14 +71,14 @@ bool Sphere(vec3 ray, vec3 pos, float radius, out vec2 dist) {
 
 vec3 MapUV(vec3 normal) {
     vec2 uv = vec2(
-        0.5 + atan(normal.z, normal.y) / (pi * 2.0),
-        0.5 - asin(normal.x) / pi
+        0.5 + atan(normal.z, -normal.x) / (pi * 2.0),
+        0.5 - asin(-normal.y) / pi
     );
 
     // divide world uv for 2 textures
     vec4 fUV = vec4(
-        vec2(uv.x * 2.0, uv.y),
-        vec2((uv.x - 0.5) * 2.0, uv.y)
+        vec2(uv.x * 2.0 - 1.0, uv.y),
+        vec2((uv.x * 2.0), uv.y)
     );
 
     // texture mapping
