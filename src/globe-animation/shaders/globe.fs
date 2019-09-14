@@ -1,6 +1,6 @@
 precision highp float;
 
-#define lightDir normalize(vec3(0.5, 0.5, 1))
+#define lightDir normalize(vec3(1, 0.3, 1))
 #define pi 3.14159265359
 
 uniform vec3 cameraPosition;
@@ -91,7 +91,7 @@ vec3 MapUV(vec3 normalDir, vec3 ray) {
     vec3 reflectDir = reflect(-staticLightDir, normalDir);
     float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 6.0) * specular;
 
-    dayMap += vec3(reflectAmount) / 1.5;
+    dayMap += vec3(reflectAmount) / 2.0;
 
     // clouds
     dayMap = mix(dayMap, vec3(1), vec3(cloud));
@@ -105,8 +105,10 @@ vec3 MapUV(vec3 normalDir, vec3 ray) {
     vec3 normalMapDir = tbn * normalMap;
 
     // lighting of earth
-    float shadow = max(0.0, dot(normalMapDir, staticLightDir));
+    float shadow = max(0.01, dot(normalMapDir, staticLightDir));
     dayMap *= shadow;
+
+    dayMap += lit * pow((1.0 - shadow), 4.0);
 
     return dayMap;
 }
