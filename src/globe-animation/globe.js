@@ -19,13 +19,23 @@ export default class Globe extends Mesh {
         const dayMap1 = new TextureLoader().load('assets/earth/day-map1.jpg');
         const dayMap2 = new TextureLoader().load('assets/earth/day-map2.jpg');
 
+        const normalMap1 = new TextureLoader().load('assets/earth/normal-map1.jpg');
+        const normalMap2 = new TextureLoader().load('assets/earth/normal-map2.jpg');
+
+        const combinedMap1 = new TextureLoader().load('assets/earth/combined-map1.jpg');
+        const combinedMap2 = new TextureLoader().load('assets/earth/combined-map2.jpg');
+        
         // globe shader
         const material = new RawShaderMaterial({
             uniforms: { 
                 invViewMatrix: { value: new Matrix4() },
                 size: { value: 1 },
                 dayMap1: { type: 't', value: dayMap1 },
-                dayMap2: { type: 't', value: dayMap2 }
+                dayMap2: { type: 't', value: dayMap2 },
+                normalMap1: { type: 't', value: normalMap1 },
+                normalMap2: { type: 't', value: normalMap2 },
+                combinedMap1: { type: 't', value: combinedMap1 },
+                combinedMap2: { type: 't', value: combinedMap2 },
 
             },
             vertexShader: vert,
