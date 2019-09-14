@@ -41,8 +41,8 @@ module.exports = {
         new webpack.HashedModuleIdsPlugin(),
         new CleanWebpackPlugin(),
         new CopyWebpackPlugin([ 
-            { from:'CNAME' },
-            { from:'public', to:'assets' },
+            { from: 'CNAME' },
+            { from: 'public', to: 'assets' },
         ]) 
     ],
 
