@@ -1,6 +1,6 @@
 precision highp float;
 
-#define light normalize(vec3(0.5, 0.5, 1))
+#define lightDir normalize(vec3(0.5, 0.5, 1))
 #define pi 3.14159265359
 
 uniform vec3 cameraPosition;
@@ -8,33 +8,25 @@ uniform float size;
 uniform mat4 invViewMatrix;
 uniform mat4 modelMatrix;
 
-uniform sampler2D dayMap1;
-uniform sampler2D dayMap2;
+uniform sampler2D dayTex;
+uniform sampler2D nrmTex;
+uniform sampler2D auxTex;
 
-uniform sampler2D normalMap1;
-uniform sampler2D normalMap2;
-
-uniform sampler2D combinedMap1;
-uniform sampler2D combinedMap2;
-
-varying vec3 worldPos;
+varying vec3 fragPos;
 
 bool Sphere(vec3 ray, vec3 pos, float radius, out vec2 dist);
 vec3 MapUV(vec3 normal, vec3 ray);
 
 void main() {
-    vec3 ray = normalize(cameraPosition - worldPos);
+    vec3 ray = normalize(cameraPosition - fragPos);
 
     vec2 test;
     if (Sphere(ray, cameraPosition, size, test)) {
 
-        vec3 iPos = (ray * test.x);
-        vec3 iNormal = normalize(cameraPosition - iPos);
+        vec3 worldPos = (ray * test.x);
+        vec3 normalDir = normalize(cameraPosition - worldPos);
 
-        vec3 color = MapUV(iNormal, ray);
-
-        float lit = max(0.0, dot(iNormal, light));
-
+        vec3 color = MapUV(normalDir, ray);
 
         gl_FragColor = vec4(color, 1);
 
@@ -76,83 +68,45 @@ bool Sphere(vec3 ray, vec3 pos, float radius, out vec2 dist) {
     return true;
 }
 
-vec3 MapUV(vec3 normal, vec3 ray) {
+vec3 MapUV(vec3 normalDir, vec3 ray) {
     vec2 uv = vec2(
-        0.5 + atan(normal.z, -normal.x) / (pi * 2.0),
-        0.5 - asin(-normal.y) / pi
-    );
-
-    // divide world uv for 2 textures
-    vec4 fUV = vec4(
-        vec2(uv.x * 2.0 - 1.0, uv.y),
-        vec2((uv.x * 2.0), uv.y)
+        0.5 + atan(normalDir.z, -normalDir.x) / (pi * 2.0),
+        0.5 - asin(-normalDir.y) / pi
     );
 
     // texture mapping
-    vec3 map;
-    vec3 nmap;
+    vec3 dayMap = texture2D(dayTex, uv).rgb;
+    vec3 normalMap = texture2D(nrmTex, uv).rgb * 2.0 - 1.0;
+    vec3 auxMap = texture2D(auxTex, uv).rgb;
+    
+    float lit = auxMap.r;
+    float specular = auxMap.g;
+    float cloud = auxMap.b;
 
-    float specular = 0.0;
-    float cloud = 0.0;
-    float lit = 0.0;
-
-    if (uv.x > 0.5) {
-        map = texture2D(dayMap1, fUV.xy).rgb;
-        nmap = texture2D(normalMap1, fUV.xy).rgb;
-
-        vec3 combined = texture2D(combinedMap1, fUV.xy).rgb;
-        specular = combined.r;
-        cloud = combined.g;
-        lit = combined.b;
-    } else {
-        map = texture2D(dayMap2, fUV.zw).rgb;
-        nmap = texture2D(normalMap2, fUV.zw).rgb;
-
-        vec3 combined = texture2D(combinedMap2, fUV.zw).rgb;
-        specular = combined.r;
-        cloud = combined.g;
-        lit = combined.b;
-    }
-
-    nmap = nmap * 2.0 - 1.0;
-
-    vec3 color = map.xyz;
 
     // for a stable light
-    vec3 lightTest = (invViewMatrix * vec4(light, 0)).rgb;
+    vec3 staticLightDir = (invViewMatrix * vec4(lightDir, 0)).rgb;
 
     // reflection of water
-    vec3 reflectDir = reflect(-lightTest, normal);
-    float r = pow(max(dot(ray, reflectDir), 0.0), 6.0) * specular;
+    vec3 reflectDir = reflect(-staticLightDir, normalDir);
+    float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 6.0) * specular;
 
-    color += vec3(r) / 1.5;
+    dayMap += vec3(reflectAmount) / 1.5;
 
     // clouds
-    color = mix(color, vec3(1), vec3(cloud));
+    dayMap = mix(dayMap, vec3(1), vec3(cloud));
 
     // normal mapping
-    mat4 modelCopy = modelMatrix;
-    modelCopy[3][3] = 0.0;
+    vec3 npole = (modelMatrix * vec4(0, 1, 0, 0)).xyz;
+    vec3 tangent = -cross(normalDir, npole);
+    vec3 biTangent = -cross(tangent, normalDir);
+    mat3 tbn = mat3(tangent, biTangent, normalDir);
 
-    vec3 npole = (modelCopy * vec4(0, 1, 0, 0)).xyz;
-    vec3 tangent = cross(normal, npole);
-    vec3 biTangent = -cross(tangent, normal);
-
-    mat3 tbn;
-    tbn[0] = tangent;
-    tbn[1] = biTangent;
-    tbn[2] = normal;
-
-    nmap.xy *= 2.0;
-    nmap = normalize(nmap);
-
-    vec3 test = tbn * nmap;
+    vec3 normalMapDir = tbn * normalMap;
 
     // lighting of earth
-    float shadow = max(0.0, dot(test, lightTest));
-    color *= shadow;
+    float shadow = max(0.0, dot(normalMapDir, staticLightDir));
+    dayMap *= shadow;
 
-
-
-    return color;
+    return dayMap;
 }

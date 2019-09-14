@@ -1,4 +1,6 @@
 import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader } from "three";
+import { LinearFilter } from "three";
+
 
 import vert from './shaders/globe.vs'
 import frag from './shaders/globe.fs'
@@ -16,26 +18,23 @@ export default class Globe extends Mesh {
         );
         geometry.setIndex([ 0, 1, 2, 1, 3, 2 ]);
 
-        const dayMap1 = new TextureLoader().load('assets/earth/day-map1.jpg');
-        const dayMap2 = new TextureLoader().load('assets/earth/day-map2.jpg');
-
-        const normalMap1 = new TextureLoader().load('assets/earth/normal-map1.jpg');
-        const normalMap2 = new TextureLoader().load('assets/earth/normal-map2.jpg');
-
-        const combinedMap1 = new TextureLoader().load('assets/earth/combined-map1.jpg');
-        const combinedMap2 = new TextureLoader().load('assets/earth/combined-map2.jpg');
+        const dayTex = new TextureLoader().load('assets/earth/earth-day.jpg');
+        const auxTex = new TextureLoader().load('assets/earth/earth-aux.jpg');
+        const nrmTex = new TextureLoader().load('assets/earth/earth-nrm.jpg');
         
+        // disable mipmapping due to issue with a seam
+        dayTex.minFilter = LinearFilter;
+        auxTex.minFilter = LinearFilter;
+        nrmTex.minFilter = LinearFilter;
+
         // globe shader
         const material = new RawShaderMaterial({
             uniforms: { 
                 invViewMatrix: { value: new Matrix4() },
                 size: { value: 1 },
-                dayMap1: { type: 't', value: dayMap1 },
-                dayMap2: { type: 't', value: dayMap2 },
-                normalMap1: { type: 't', value: normalMap1 },
-                normalMap2: { type: 't', value: normalMap2 },
-                combinedMap1: { type: 't', value: combinedMap1 },
-                combinedMap2: { type: 't', value: combinedMap2 },
+                dayTex: { type: 't', value: dayTex },
+                auxTex: { type: 't', value: auxTex },
+                nrmTex: { type: 't', value: nrmTex },
 
             },
             vertexShader: vert,

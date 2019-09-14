@@ -10,7 +10,7 @@ uniform vec3 cameraPosition;
 uniform float size;
 
 attribute vec3 vertexPos;
-varying vec3 worldPos;
+varying vec3 fragPos;
 
 // sPos : position of sphere in 2D, where the Y should be perpendicular to camera plane
 // s    : sign for either min or max of sphere on X axis of sPos
@@ -56,7 +56,8 @@ void main() {
     viewPos.y += perspectiveCorrect(spherePos.yz, vertexPos.y);
 
     // forward world pos of vertex to fragment shader
-    worldPos = (invViewMatrix * viewPos).xyz;
+    fragPos = (invViewMatrix * viewPos).xyz;
 
+    // corner positions of plane
     gl_Position = projectionMatrix * viewPos;
 }
