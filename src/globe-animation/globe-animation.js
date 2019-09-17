@@ -13,7 +13,7 @@ export default class GlobeAnimation {
         const objf = new Object3D();
         
         this.scene.add(this.objc);
-        objf.position.z = 10;
+        objf.position.z = 5;
         this.objc.add(objf);
         objf.add(this.camera);
 

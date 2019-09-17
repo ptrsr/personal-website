@@ -10,10 +10,10 @@ export default class Globe extends Mesh {
         // simple plane geometry
         const geometry = new BufferGeometry();
         geometry.addAttribute("vertexPos", new Float32BufferAttribute([
-             1,  1, 0,  // TR
-            -1,  1, 0,  // TL
-             1, -1, 0,  // BR
-            -1, -1, 0], // BL
+             3,  3, 0,  // TR
+            -3,  3, 0,  // TL
+             3, -3, 0,  // BR
+            -3, -3, 0], // BL
             3)
         );
         geometry.setIndex([ 0, 1, 2, 1, 3, 2 ]);
