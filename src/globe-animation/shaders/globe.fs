@@ -6,8 +6,8 @@ precision highp float;
 
 
 // scatter const
-#define R_INNER .7
-#define R_OUTER .5
+#define R_INNER .5
+#define R_OUTER .2
 
 #define NUM_OUT_SCATTER 8.0
 #define NUM_IN_SCATTER 15.0
@@ -38,18 +38,22 @@ void main() {
         return;
     }
 
-    // vec3 worldPos = (ray * outerSphereHits.x);
-    // vec3 normalDir = normalize(cameraPosition - worldPos);
-    // vec3 color = MapUV(normalDir, ray);
-    // gl_FragColor = vec4(color, 1);
 
     vec2 innerSphereHits = Sphere(cameraPosition, ray, R_INNER);
 
+    vec3 color = vec3(0);
+    if (innerSphereHits.x < innerSphereHits.y) {
+        vec3 worldPos = (ray * innerSphereHits.x);
+        vec3 normalDir = normalize(cameraPosition - worldPos);
+        color = MapUV(normalDir, ray);
+    }
+
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
     
+    vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, lightDir);
+    color += vec3(pow( I, vec3( 1.0 / 2.2 ) ));
 
-    vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits, lightDir);
-	gl_FragColor = vec4( pow( I, vec3( 1.0 / 2.2 ) ), 1.0 );
+    gl_FragColor = vec4(color, 1);
 }
 
 // ray intersects sphere
@@ -88,7 +92,7 @@ vec3 MapUV(vec3 normalDir, vec3 ray) {
     vec3 staticLightDir = (invViewMatrix * vec4(lightDir, 0)).rgb;
 
     // reflection of water
-    vec3 reflectDir = reflect(-staticLightDir, normalDir);
+    vec3 reflectDir = reflect(-lightDir, normalDir);
     float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 6.0) * specular;
 
     dayMap += vec3(reflectAmount) / 2.0;
@@ -105,7 +109,7 @@ vec3 MapUV(vec3 normalDir, vec3 ray) {
     vec3 normalMapDir = tbn * normalMap;
 
     // lighting of earth
-    float shadow = max(0.01, dot(normalMapDir, staticLightDir));
+    float shadow = max(0.01, dot(normalMapDir, lightDir));
     dayMap *= shadow;
 
     dayMap += lit * pow((1.0 - shadow), 4.0);
@@ -166,12 +170,12 @@ float optic( vec3 p, vec3 q, float ph ) {
 
 
 vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l ) {
-	const float ph_ray = 0.01;
-    const float ph_mie = 0.04;
+	const float ph_ray = 0.005;
+    const float ph_mie = 0.0001;
     
     const vec3 k_ray = vec3( 3.8, 13.5, 33.1 );
     const vec3 k_mie = vec3( 21.0 );
-    const float k_mie_ex = 0.01;
+    const float k_mie_ex = 0.0;
     
 	vec3 sum_ray = vec3( 0.0 );
     vec3 sum_mie = vec3( 0.0 );
@@ -212,5 +216,5 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l ) {
      	sum_mie * k_mie * phase_mie( -0.78, c, cc );
     
 	
-	return .03 * scatter;
+	return 3.0 * scatter;
 }
