@@ -7,11 +7,18 @@ precision highp float;
 
 // scatter const
 #define RATIO 0.98
-#define RED_OUT 1.2
+#define RED_OUT 1.0
 
+#define ATMOS_REACH .1
+#define ATMOS_SCALE 20.0
+#define SHINE_THROUGH 0.48
 
-#define NUM_OUT_SCATTER 8.0
-#define NUM_IN_SCATTER 15.0
+#define NUM_OUT_SCATTER 1.0
+#define NUM_IN_SCATTER 8.0
+
+#define PH_RAY 0.03
+#define PH_MIE 0.002
+
 
 
 uniform vec3 cameraPosition;
@@ -26,35 +33,47 @@ uniform sampler2D auxTex;
 varying vec3 fragPos;
 
 vec2 Sphere(vec3 origin, vec3 ray, float radius);
-vec3 MapUV(vec3 normal, vec3 ray, float light);
+vec3 MapUV(vec3 normal, vec3 ray, vec3 lightDir);
 vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer );
 
 void main() {
     float inner = scale * RATIO;
     float outer = scale;
 
+    vec3 color = vec3(0);
+    
+    // out of screen ray
     vec3 ray = normalize(cameraPosition - fragPos);
 
+    // atmosphere raycast
     vec2 outerSphereHits = Sphere(cameraPosition, ray, outer);
-
     if (outerSphereHits.x > outerSphereHits.y) {
         gl_FragColor = vec4(0);
         return;
     }
 
+    // planet raycast
     vec2 innerSphereHits = Sphere(cameraPosition, ray, inner);
-
-    vec3 color = vec3(0);
     if (innerSphereHits.x < innerSphereHits.y) {
+        // calculate world normal
         vec3 worldPos = (ray * innerSphereHits.x);
         vec3 normalDir = normalize(cameraPosition - worldPos);
-        color = MapUV(normalDir, ray, 1.0);
+
+        // final earth texture
+        // color = MapUV(normalDir, ray, LIGHT_DIR);
     }
 
+    // atmosphere normal
+    vec3 worldPos = (ray * outerSphereHits.x);
+    vec3 normalDir = normalize(cameraPosition - worldPos);
+    float atmosL = min (1.0, 2.5 + dot(LIGHT_DIR, normalDir) * 6.0);
+
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
-    
+
     vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, LIGHT_DIR, inner, outer);
+    // color += I;
     color += vec3(pow( I, vec3( 1.0 / 2.2 ) ));
+    color *= atmosL;
 
     gl_FragColor = vec4(color, 1);
 }
@@ -75,7 +94,7 @@ vec2 Sphere(vec3 origin, vec3 ray, float radius) {
 }
 
 
-vec3 MapUV(vec3 normalDir, vec3 ray, float light) {
+vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
     vec2 uv = vec2(
         0.5 + atan(normalDir.z, -normalDir.x) / (PI * 2.0),
         0.5 - asin(-normalDir.y) / PI
@@ -91,11 +110,8 @@ vec3 MapUV(vec3 normalDir, vec3 ray, float light) {
     float cloud = auxMap.b;
 
 
-    // for a stable light
-    vec3 staticLightDir = (invViewMatrix * vec4(LIGHT_DIR, 0)).rgb;
-
     // reflection of water
-    vec3 reflectDir = reflect(-LIGHT_DIR, normalDir);
+    vec3 reflectDir = reflect(-lightDir, normalDir);
     float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 6.0) * specular;
 
     dayMap += vec3(reflectAmount) / 2.0;
@@ -112,7 +128,7 @@ vec3 MapUV(vec3 normalDir, vec3 ray, float light) {
     vec3 normalMapDir = tbn * normalMap;
 
     // lighting of earth
-    float shadow = max(0.01, dot(normalMapDir, LIGHT_DIR));
+    float shadow = max(0.01, dot(normalMapDir, lightDir));
     dayMap *= shadow;
 
     dayMap += lit * pow((1.0 - shadow), 4.0);
@@ -154,7 +170,7 @@ float phase_ray( float cc ) {
 
 
 float density( vec3 p, float ph, float d ) {
-	return exp( -max( length( p ) - d, 0.0 ) / ph );
+	return exp( -max( length( p ) - d, 0.0 ) / (ph * ATMOS_REACH) );
 }
 
 float optic( vec3 p, vec3 q, float ph, float d ) {
@@ -173,11 +189,11 @@ float optic( vec3 p, vec3 q, float ph, float d ) {
 
 
 vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
-	const float ph_ray = 0.005;
-    const float ph_mie = 0.0001;
+	const float ph_ray = PH_RAY;
+    const float ph_mie = PH_MIE;
     
     const vec3 k_ray = vec3( 3.8, 13.5, 33.1 );
-    const vec3 k_mie = vec3( 21.0 );
+    const vec3 k_mie = vec3( 27 );
     const float k_mie_ex = 0.0;
     
 	vec3 sum_ray = vec3( 0.0 );
@@ -187,8 +203,8 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
     float n_mie0 = 0.0;
     
 	float len = ( e.y - e.x ) / float( NUM_IN_SCATTER );
-    vec3 s = dir * len;
-	vec3 v = o + dir * ( e.x + len * 0.5 );
+    vec3 s = -dir * len;
+	vec3 v = -o + -dir * ( e.x + len * 0.5 );
     
     for ( float i = 0.0; i < NUM_IN_SCATTER; i++ ) {   
 		float d_ray = density( v, ph_ray, inner ) * len;
@@ -196,10 +212,9 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
         
         n_ray0 += d_ray;
         n_mie0 += d_mie;
-        
 
         vec2 f = Sphere( v, l, outer * RED_OUT );
-		vec3 u = v + l * f.y;
+		vec3 u = v - l * f.y;
         
         float n_ray1 = optic( v, u, ph_ray, inner );
         float n_mie1 = optic( v, u, ph_mie, inner );
@@ -216,8 +231,8 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
 	float cc = c * c;
     vec3 scatter =
         sum_ray * k_ray * phase_ray( cc ) +
-     	sum_mie * k_mie * phase_mie( -0.78, c, cc );
+     	sum_mie * k_mie * phase_mie(SHINE_THROUGH, c, cc );
     
 	
-	return 3.0 * scatter;
+	return ATMOS_SCALE * scatter;
 }
