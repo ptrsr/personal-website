@@ -7,7 +7,7 @@ uniform mat4 invViewMatrix;
 
 uniform vec3 cameraPosition;
 
-uniform float size;
+uniform float scale;
 
 attribute vec3 vertexPos;
 varying vec3 fragPos;
@@ -18,8 +18,8 @@ varying vec3 fragPos;
 float perspectiveCorrect(vec2 sPos, float s) {
     float l = sqrt(pow(sPos.y, 2.0) + pow(sPos.x, 2.0));
     float a = asin(sPos.x / l);
-    float b = asin(size / l) * s;
-    return ((size / cos(a + b)) - size) * s;
+    float b = asin(scale / l) * s;
+    return ((scale / cos(a + b)) - scale) * s;
 }
 
 void main() {
@@ -31,19 +31,19 @@ void main() {
     mat4 modelViewMatrix = viewMatrix * modelMatrix;
 
     // first column
-    modelViewMatrix[0][0] = 1.0; 
+    modelViewMatrix[0][0] = scale; 
     modelViewMatrix[0][1] = 0.0; 
     modelViewMatrix[0][2] = 0.0; 
 
     // second column
     modelViewMatrix[1][0] = 0.0; 
-    modelViewMatrix[1][1] = 1.0; 
+    modelViewMatrix[1][1] = scale; 
     modelViewMatrix[1][2] = 0.0; 
 
     // third column
     modelViewMatrix[2][0] = 0.0; 
     modelViewMatrix[2][1] = 0.0; 
-    modelViewMatrix[2][2] = 1.0; 
+    modelViewMatrix[2][2] = scale; 
 
     // position of render plane vertex relative to camera
     vec4 viewPos = modelViewMatrix * vec4(vertexPos, 1);

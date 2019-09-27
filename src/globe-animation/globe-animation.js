@@ -18,10 +18,8 @@ export default class GlobeAnimation {
         objf.add(this.camera);
 
         
-        const globe = new Globe();
+        const globe = new Globe(0.5);
         this.scene.add(globe);
-
-        globe.setSphereSize(1);
 
         this.renderer = new WebGLRenderer({ canvas });
 

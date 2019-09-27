@@ -1,4 +1,4 @@
-import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader } from "three";
+import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3 } from "three";
 import { LinearFilter } from "three";
 
 
@@ -6,18 +6,19 @@ import vert from './shaders/globe.vs'
 import frag from './shaders/globe.fs'
 
 export default class Globe extends Mesh {
-    constructor(size = 1) {
+    constructor(scale = 1) {
         // simple plane geometry
         const geometry = new BufferGeometry();
         geometry.addAttribute("vertexPos", new Float32BufferAttribute([
-             3,  3, 0,  // TR
-            -3,  3, 0,  // TL
-             3, -3, 0,  // BR
-            -3, -3, 0], // BL
+             1,  1, 0,  // TR
+            -1,  1, 0,  // TL
+             1, -1, 0,  // BR
+            -1, -1, 0], // BL
             3)
         );
         geometry.setIndex([ 0, 1, 2, 1, 3, 2 ]);
 
+        // load textures
         const dayTex = new TextureLoader().load('assets/earth/earth-day.jpg');
         const auxTex = new TextureLoader().load('assets/earth/earth-aux.jpg');
         const nrmTex = new TextureLoader().load('assets/earth/earth-nrm.jpg');
@@ -31,7 +32,7 @@ export default class Globe extends Mesh {
         const material = new RawShaderMaterial({
             uniforms: { 
                 invViewMatrix: { value: new Matrix4() },
-                size: { value: 1 },
+                scale: { value: scale },
                 dayTex: { type: 't', value: dayTex },
                 auxTex: { type: 't', value: auxTex },
                 nrmTex: { type: 't', value: nrmTex },
@@ -41,15 +42,11 @@ export default class Globe extends Mesh {
             fragmentShader: frag
         });
 
+        // mesh constructor
         super(geometry, material);
-        this.size = size;
-
+        
         this.onBeforeRender = (renderer, scene, camera, geometry, material) => {
             material.uniforms.invViewMatrix.value = camera.matrixWorld;
         }
-    }
-
-    setSphereSize = (size) => {
-        this.material.uniforms.size.value = size;
     }
 }
