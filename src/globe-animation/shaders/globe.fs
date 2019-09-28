@@ -1,4 +1,5 @@
 precision highp float;
+#extension GL_OES_standard_derivatives : enable
 
 #define LIGHT_DIR normalize(vec3(1, 0.3, 1))
 #define PI 3.14159265359
@@ -94,8 +95,14 @@ vec2 Sphere(vec3 origin, vec3 ray, float radius) {
 
 
 vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
+    // https://forum.unity.com/threads/what-is-this-mipmap-artifact.657052/
+    float t = atan(normalDir.x, normalDir.z) / (2.0 * PI);
+
+    float t_a = t + 0.5;
+    float t_b = fract(t + 1.0) - 0.5;
+    
     vec2 uv = vec2(
-        0.5 + atan(normalDir.z, -normalDir.x) / (PI * 2.0),
+        fwidth(t_a) < fwidth(t_b) ? t_a : t_b,
         0.5 - asin(-normalDir.y) / PI
     );
 

@@ -29,6 +29,7 @@ export default class GlobeAnimation {
         // this.renderer.antialias = true;
 
         this.renderer.setClearColor(new Color('black'));
+        
 
         this.onWindowResize();
 

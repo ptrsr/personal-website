@@ -1,5 +1,5 @@
 import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3 } from "three";
-import { LinearFilter } from "three";
+import { RepeatWrapping } from "three";
 
 
 import vert from './shaders/globe.vs'
@@ -23,10 +23,14 @@ export default class Globe extends Mesh {
         const auxTex = new TextureLoader().load('assets/earth/earth-aux.jpg');
         const nrmTex = new TextureLoader().load('assets/earth/earth-nrm.jpg');
         
+        dayTex.wrapS = RepeatWrapping;
+        auxTex.wrapS = RepeatWrapping;
+        nrmTex.wrapS = RepeatWrapping;
+
         // disable mipmapping due to issue with a seam
-        dayTex.minFilter = LinearFilter;
-        auxTex.minFilter = LinearFilter;
-        nrmTex.minFilter = LinearFilter;
+        // dayTex.minFilter = LinearFilter;
+        // auxTex.minFilter = LinearFilter;
+        // nrmTex.minFilter = LinearFilter;
 
         // globe shader
         const material = new RawShaderMaterial({
