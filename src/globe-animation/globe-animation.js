@@ -63,20 +63,13 @@ export default class GlobeAnimation {
     onWindowResize = () => {
         const canv = this.renderer.domElement;
 
-        const pixelRatio = window.devicePixelRatio;
-
         const width = canv.clientWidth;
         const height = canv.clientHeight;
 
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
         
-        // this.renderer.setPixelRatio( window.devicePixelRatio );
+        this.renderer.setPixelRatio( window.devicePixelRatio );
         this.renderer.setSize(canv.clientWidth, canv.clientHeight, false);
-
-     
      }
-
-
 }
-
