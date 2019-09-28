@@ -19,7 +19,7 @@ export default class GlobeAnimation {
         this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
         this.controls.dampingFactor = 0.05;
         // this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 3;
+        this.controls.minDistance = 2;
         this.controls.maxDistance = 10;
         // this.controls.maxPolarAngle = Math.PI / 2;
 
