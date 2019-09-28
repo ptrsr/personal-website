@@ -27,11 +27,6 @@ export default class Globe extends Mesh {
         auxTex.wrapS = RepeatWrapping;
         nrmTex.wrapS = RepeatWrapping;
 
-        // disable mipmapping due to issue with a seam
-        // dayTex.minFilter = LinearFilter;
-        // auxTex.minFilter = LinearFilter;
-        // nrmTex.minFilter = LinearFilter;
-
         // globe shader
         const material = new RawShaderMaterial({
             uniforms: { 

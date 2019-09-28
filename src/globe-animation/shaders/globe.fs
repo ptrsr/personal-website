@@ -8,17 +8,17 @@ precision highp float;
 
 // scatter const
 #define RATIO 0.98
-#define RED_OUT 1.0
+#define RED_OUT 1.0 // TODO: remove
 
-#define ATMOS_REACH .1
-#define ATMOS_SCALE 50.0
-#define SHINE_THROUGH 0.48
+#define ATMOS_REACH .0015
+#define ATMOS_SCALE 60.0
+#define SHINE_THROUGH 0.88
 
 #define NUM_OUT_SCATTER 1.0
 #define NUM_IN_SCATTER 4.0
 
-#define PH_RAY 0.03
-#define PH_MIE 0.002
+#define PH_RAY 1.0
+#define PH_MIE 0.2
 
 
 
@@ -67,11 +67,8 @@ void main() {
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
 
     vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, LIGHT_DIR, inner, outer);
-    // color += I;
-    float test = min(1.0, 0.6 + length(pow(I, vec3(1.0 / 2.0))));
-    // color += vec3(pow( I, vec3( 1.0 / 1.2 ) )) * test;
 
-    color += pow(I, vec3(1.5));
+    color += pow(I, vec3(1.2));
 
     // color *= atmosL;
 

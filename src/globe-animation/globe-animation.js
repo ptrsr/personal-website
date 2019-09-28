@@ -8,6 +8,8 @@ export default class GlobeAnimation {
     constructor(canvas) {
         this.scene = new Scene();
         this.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.set(0, 0, 3);
+
 
         const globe = new Globe(0.5);
         this.scene.add(globe);
@@ -21,16 +23,13 @@ export default class GlobeAnimation {
         // this.controls.screenSpacePanning = false;
         this.controls.minDistance = 2;
         this.controls.maxDistance = 10;
+
         // this.controls.maxPolarAngle = Math.PI / 2;
 
         this.controls.update();
 
-
-        // this.renderer.antialias = true;
-
         this.renderer.setClearColor(new Color('black'));
         
-
         this.onWindowResize();
 
         const clock = new Clock(true);
@@ -40,6 +39,17 @@ export default class GlobeAnimation {
         this.loop(clock, counter);
 
         window.addEventListener( 'resize', this.onWindowResize, false );
+
+
+        window.test = (pr) => {
+            const clock = new Clock(true);
+            for (let i = 0; i < 10; i++) {
+                this.renderer.setPixelRatio(pr);
+
+            }
+            console.log(clock.getElapsedTime());
+        }
+
     }
 
 
