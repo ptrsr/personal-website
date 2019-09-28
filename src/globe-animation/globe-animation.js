@@ -1,27 +1,30 @@
 import { Color, WebGLRenderer, Scene, PerspectiveCamera, Clock } from 'three'
 import { Object3D } from 'three'
+import { OrbitControls } from './orbit-controls.js'
 
 import Globe from './globe.js'
-
 
 export default class GlobeAnimation {
     constructor(canvas) {
         this.scene = new Scene();
         this.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-        this.objc = new Object3D();
-        const objf = new Object3D();
-        
-        this.scene.add(this.objc);
-        objf.position.z = 4;
-        this.objc.add(objf);
-        objf.add(this.camera);
-
-        
         const globe = new Globe(0.5);
         this.scene.add(globe);
-
+        
         this.renderer = new WebGLRenderer({ canvas });
+        
+        this.controls = new OrbitControls(this.camera);
+        //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
+        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        this.controls.dampingFactor = 0.05;
+        // this.controls.screenSpacePanning = false;
+        this.controls.minDistance = 3;
+        this.controls.maxDistance = 10;
+        // this.controls.maxPolarAngle = Math.PI / 2;
+
+        this.controls.update();
+
 
         // this.renderer.antialias = true;
 
@@ -44,8 +47,10 @@ export default class GlobeAnimation {
         // this.camera.position.y = Math.sin(clock.elapsedTime);
 
         //counter.innerHTML = 1 / delta;
-        this.objc.rotateY(delta / 3.0);
+        // this.objc.rotateY(delta / 3.0);
 
+
+        this.controls.update();
         this.renderer.render(this.scene, this.camera);
 
 

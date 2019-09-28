@@ -10,7 +10,7 @@ precision highp float;
 #define RED_OUT 1.0
 
 #define ATMOS_REACH .1
-#define ATMOS_SCALE 20.0
+#define ATMOS_SCALE 50.0
 #define SHINE_THROUGH 0.48
 
 #define NUM_OUT_SCATTER 1.0
@@ -60,20 +60,19 @@ void main() {
         vec3 normalDir = normalize(cameraPosition - worldPos);
 
         // final earth texture
-        // color = MapUV(normalDir, ray, LIGHT_DIR);
+        color = MapUV(normalDir, ray, LIGHT_DIR);
     }
-
-    // atmosphere normal
-    vec3 worldPos = (ray * outerSphereHits.x);
-    vec3 normalDir = normalize(cameraPosition - worldPos);
-    float atmosL = min (1.0, 2.5 + dot(LIGHT_DIR, normalDir) * 6.0);
 
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
 
     vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, LIGHT_DIR, inner, outer);
     // color += I;
-    color += vec3(pow( I, vec3( 1.0 / 2.2 ) ));
-    color *= atmosL;
+    float test = min(1.0, 0.6 + length(pow(I, vec3(1.0 / 2.0))));
+    // color += vec3(pow( I, vec3( 1.0 / 1.2 ) )) * test;
+
+    color += pow(I, vec3(1.5));
+
+    // color *= atmosL;
 
     gl_FragColor = vec4(color, 1);
 }
@@ -192,7 +191,7 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
 	const float ph_ray = PH_RAY;
     const float ph_mie = PH_MIE;
     
-    const vec3 k_ray = vec3( 3.8, 13.5, 33.1 );
+    const vec3 k_ray = vec3( 7.8, 10.5, 17.1 );
     const vec3 k_mie = vec3( 27 );
     const float k_mie_ex = 0.0;
     
