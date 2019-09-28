@@ -10,8 +10,8 @@ precision highp float;
 #define RATIO 0.98
 #define RED_OUT 1.0 // TODO: remove
 
-#define ATMOS_REACH .0015
-#define ATMOS_SCALE 20.0
+#define ATMOS_REACH .002
+#define ATMOS_SCALE 40.0
 #define SHINE_THROUGH 0.88
 
 #define NUM_OUT_SCATTER 1.0
@@ -195,7 +195,7 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
 	const float ph_ray = PH_RAY;
     const float ph_mie = PH_MIE;
     
-    const vec3 k_ray = vec3( 7.8, 10.5, 17.1 );
+    const vec3 k_ray = vec3( 7.8, 10.5, 17.1 ) * .5;
     const vec3 k_mie = vec3( 27 );
     const float k_mie_ex = 0.0;
     
@@ -213,13 +213,13 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
     float test = min(abs(e.x - e.y) * 2.0, 1.0);
 
     for ( float i = 0.0; i < NUM_IN_SCATTER; i++ ) {   
-		float d_ray = density( v, ph_ray, inner ) * len * 4.0;
+		float d_ray = density( v, ph_ray, inner ) * len * 3.0;
         float d_mie = density( v, ph_mie, inner ) * len;
         
         n_ray0 += d_ray;
         n_mie0 += d_mie;
 
-        vec2 f = Sphere( v, l, outer * RED_OUT ) * 0.3;
+        vec2 f = Sphere( v, l, outer * RED_OUT ) * 0.7;
 		vec3 u = v - l * f.y;
         
         float n_ray1 = optic( v, u, ph_ray, inner );
