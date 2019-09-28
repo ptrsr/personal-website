@@ -18,7 +18,7 @@ precision highp float;
 #define NUM_IN_SCATTER 4.0
 
 #define PH_RAY .8
-#define PH_MIE 0.2
+#define PH_MIE 0.15
 
 
 
@@ -197,7 +197,7 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
     
     const vec3 k_ray = vec3( 7.8, 10.5, 17.1 ) * .5;
     const vec3 k_mie = vec3( 27 );
-    const float k_mie_ex = 0.0;
+    const float k_mie_ex = -0.05;
     
 	vec3 sum_ray = vec3( 0.0 );
     vec3 sum_mie = vec3( 0.0 );
@@ -219,7 +219,7 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
         n_ray0 += d_ray;
         n_mie0 += d_mie;
 
-        vec2 f = Sphere( v, l, outer * RED_OUT ) * 0.7;
+        vec2 f = Sphere( v, l, outer * RED_OUT ) * 1.5;
 		vec3 u = v - l * f.y;
         
         float n_ray1 = optic( v, u, ph_ray, inner );
