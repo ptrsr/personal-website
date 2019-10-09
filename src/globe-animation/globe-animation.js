@@ -6,6 +6,12 @@ import Globe from './globe.js'
 
 export default class GlobeAnimation {
     constructor(canvas) {
+
+
+
+        
+
+
         this.scene = new Scene();
         this.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0, 0, 3);

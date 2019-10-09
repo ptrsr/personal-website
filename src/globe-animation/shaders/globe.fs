@@ -26,6 +26,8 @@ uniform vec3 cameraPosition;
 uniform float scale;
 uniform mat4 invViewMatrix;
 uniform mat4 modelMatrix;
+uniform vec3 lDir;
+
 
 uniform sampler2D dayTex;
 uniform sampler2D nrmTex;
@@ -61,12 +63,12 @@ void main() {
         vec3 normalDir = normalize(cameraPosition - worldPos);
 
         // final earth texture
-        color = MapUV(normalDir, ray, LIGHT_DIR);
+        color = MapUV(normalDir, ray, lDir);
     }
 
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
 
-    vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, LIGHT_DIR, inner, outer);
+    vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, lDir, inner, outer);
 
     color += pow(I, vec3(1.2));
 
