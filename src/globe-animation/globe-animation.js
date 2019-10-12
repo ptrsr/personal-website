@@ -6,19 +6,13 @@ import Globe from './globe.js'
 
 export default class GlobeAnimation {
     constructor(canvas) {
-
-
-
-        
-
-
         this.scene = new Scene();
         this.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0, 0, 3);
 
 
-        const globe = new Globe(0.5);
-        this.scene.add(globe);
+        document.globe = new Globe(0.5);
+        this.scene.add(document.globe);
         
         this.renderer = new WebGLRenderer({ canvas });
         
@@ -45,17 +39,7 @@ export default class GlobeAnimation {
         this.loop(clock, counter);
 
         window.addEventListener( 'resize', this.onWindowResize, false );
-
-
-        window.test = (pr) => {
-            const clock = new Clock(true);
-            for (let i = 0; i < 10; i++) {
-                this.renderer.setPixelRatio(pr);
-
-            }
-            console.log(clock.getElapsedTime());
-        }
-
+        document.globe.SetSun(Date.now());
     }
 
 
