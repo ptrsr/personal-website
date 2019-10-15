@@ -7,17 +7,17 @@ precision highp float;
 
 
 // scatter const
-#define RATIO 0.98
+#define RATIO 0.99
 #define RED_OUT 1.0 // TODO: remove
 
-#define ATMOS_REACH .002
+#define ATMOS_REACH .005
 #define ATMOS_SCALE 40.0
 #define SHINE_THROUGH 0.88
 
 #define NUM_OUT_SCATTER 1.0
 #define NUM_IN_SCATTER 4.0
 
-#define PH_RAY .8
+#define PH_RAY 0.8
 #define PH_MIE 0.15
 
 
@@ -180,7 +180,7 @@ float density( vec3 p, float ph, float d ) {
 
 float optic( vec3 p, vec3 q, float ph, float d ) {
 	vec3 s = ( q - p ) / NUM_OUT_SCATTER;
-	vec3 v = p + s * 0.5;
+	vec3 v = p + s * 0.2;
 	
 	float sum = 0.0;
 	for ( float i = 0.0; i < NUM_OUT_SCATTER; i++ ) {
