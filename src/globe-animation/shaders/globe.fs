@@ -215,7 +215,7 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
     float test = min(abs(e.x - e.y) * 2.0, 1.0);
 
     for ( float i = 0.0; i < NUM_IN_SCATTER; i++ ) {   
-		float d_ray = density( v, ph_ray, inner ) * len * 3.0;
+		float d_ray = density( v, ph_ray, inner ) * len * 5.0;
         float d_mie = density( v, ph_mie, inner ) * len;
         
         n_ray0 += d_ray;
@@ -242,7 +242,7 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
 	float c  = dot( dir, -l );
 	float cc = c * c;
     vec3 scatter =
-        sum_ray * k_ray * phase_ray( cc ) +
+        sum_ray * k_ray * phase_ray( cc / 1000. ) +
      	sum_mie * k_mie * phase_mie(SHINE_THROUGH, c, cc );
     
 	
