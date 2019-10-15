@@ -136,7 +136,7 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
     float shadow = max(0.01, dot(normalMapDir, lightDir));
     dayMap *= shadow;
 
-    dayMap += lit * pow((1.0 - max(0., dot(lightDir, normalDir) + 0.2)), 6.0);
+    dayMap += lit * pow((1.0 - max(0., dot(lightDir, normalDir) + 0.2)), 5.0);
 
     dayMap = mix(dayMap, vec3(1), reflectAmount / 2.0);
 

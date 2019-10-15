@@ -23,6 +23,7 @@ export default class GlobeAnimation {
         // this.controls.screenSpacePanning = false;
         this.controls.minDistance = 2;
         this.controls.maxDistance = 10;
+        this.controls.enablePan = false;
 
         // this.controls.maxPolarAngle = Math.PI / 2;
 
