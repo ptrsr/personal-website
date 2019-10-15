@@ -18,7 +18,7 @@ precision highp float;
 #define NUM_IN_SCATTER 4.0
 
 #define PH_RAY 0.8
-#define PH_MIE 0.15
+#define PH_MIE 0.05
 
 
 
