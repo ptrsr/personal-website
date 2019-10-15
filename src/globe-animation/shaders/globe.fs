@@ -117,12 +117,12 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
 
     // reflection of water
     vec3 reflectDir = reflect(-lightDir, normalDir);
-    float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 6.0) * specular;
+    float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 15.0) * specular;
 
-    dayMap += vec3(reflectAmount) / 2.0;
+    
 
     // clouds
-    dayMap = mix(dayMap, vec3(1), vec3(cloud));
+    dayMap = mix(dayMap, vec3(1), vec3(cloud * 1.1));
 
     // normal mapPIng
     vec3 npole = (modelMatrix * vec4(0, 1, 0, 0)).xyz;
@@ -136,7 +136,9 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
     float shadow = max(0.01, dot(normalMapDir, lightDir));
     dayMap *= shadow;
 
-    dayMap += lit * pow((1.0 - shadow), 4.0);
+    dayMap += lit * pow((1.0 - max(0., dot(lightDir, normalDir) + 0.2)), 6.0);
+
+    dayMap = mix(dayMap, vec3(1), reflectAmount / 2.0);
 
     return dayMap;
 }
@@ -199,7 +201,7 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
     
     const vec3 k_ray = vec3( 7.8, 10.5, 17.1 ) * .5;
     const vec3 k_mie = vec3( 27 );
-    const float k_mie_ex = -0.05;
+    float k_mie_ex = -0.05 * max(-0.2, min(1.0, .5 + dot( dir, -l ) * 3.0));
     
 	vec3 sum_ray = vec3( 0.0 );
     vec3 sum_mie = vec3( 0.0 );
