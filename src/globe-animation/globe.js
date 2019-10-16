@@ -9,7 +9,6 @@ import frag from './shaders/globe.fs'
 
 export default class Globe extends Mesh {
     constructor(scale = 1) {
-
         // simple plane geometry
         const geometry = new BufferGeometry();
         geometry.addAttribute("vertexPos", new Float32BufferAttribute([
@@ -21,10 +20,11 @@ export default class Globe extends Mesh {
         );
         geometry.setIndex([ 0, 1, 2, 1, 3, 2 ]);
 
+        const loader = new TextureLoader();
         // load textures
-        const dayTex = new TextureLoader().load('assets/earth/earth-day.jpg');
-        const auxTex = new TextureLoader().load('assets/earth/earth-aux.jpg');
-        const nrmTex = new TextureLoader().load('assets/earth/earth-nrm.jpg');
+        const dayTex = loader.load('assets/earth/earth-day.jpg');
+        const auxTex = loader.load('assets/earth/earth-aux.jpg');
+        const nrmTex = loader.load('assets/earth/earth-nrm.jpg');
         
         dayTex.wrapS = RepeatWrapping;
         auxTex.wrapS = RepeatWrapping;

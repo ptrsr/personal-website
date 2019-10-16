@@ -1,76 +1,76 @@
 import { Color, WebGLRenderer, Scene, PerspectiveCamera, Clock } from 'three'
-import { Object3D } from 'three'
 import { OrbitControls } from './orbit-controls.js'
+import SVGLoader from './svg-loader.js'
 
 import Globe from './globe.js'
 
+
+// import { Loader, Vector2, FileLoader, ShapePath, Path, Matrix3, BufferGeometry, Float32BufferAttribute } from 'three';
+
+
 export default class GlobeAnimation {
     constructor(canvas) {
-        this.scene = new Scene();
-        this.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.camera.position.set(0, 0, 3);
+        // create empty scene
+        const scene = new Scene();
 
-
-        document.globe = new Globe(0.5);
-        this.scene.add(document.globe);
+        // setup camera
+        const camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 3);
         
-        this.renderer = new WebGLRenderer({ canvas });
+        // setup renderer
+        const renderer = new WebGLRenderer({ canvas });
+        renderer.setClearColor(new Color('black'));
         
-        this.controls = new OrbitControls(this.camera);
-        //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
-        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        this.controls.dampingFactor = 0.05;
-        // this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 2;
-        this.controls.maxDistance = 10;
-        this.controls.enablePan = false;
-
-        // this.controls.maxPolarAngle = Math.PI / 2;
-
-        this.controls.update();
-
-        this.renderer.setClearColor(new Color('black'));
+        // update screen resolution
+        window.addEventListener( 'resize', this.onWindowResize.bind(null, camera, renderer), false);
+        window.dispatchEvent(new Event('resize'));
         
-        this.onWindowResize();
+        // instantiate globe
+        const globe = new Globe(0.5);
+        globe.SetSun(Date.now());
+        scene.add(globe);
+        
+        // setup controls
+        const controls = new OrbitControls(camera);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 2;
+        controls.maxDistance = 10;
+        controls.enablePan = false;
 
+        // start loop
         const clock = new Clock(true);
+        this.loop({ scene, clock, controls, renderer, camera });
 
-        const counter = document.getElementById('fps');
+        const loader = new SVGLoader();
 
-        this.loop(clock, counter);
-
-        window.addEventListener( 'resize', this.onWindowResize, false );
-        document.globe.SetSun(Date.now());
+        loader.load('/assets/map.svg', 
+            function(data) {console.log(data)},
+            function(xhr) {console.log("loading...")},
+            function(error) {console.error(error)}
+        );
     }
 
 
-    loop = (clock, counter) => {
-        const delta = clock.getDelta();
-        // this.camera.position.y = Math.sin(clock.elapsedTime);
-
-        //counter.innerHTML = 1 / delta;
-        // this.objc.rotateY(delta / 3.0);
-
-
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
-
+    loop = (objects) => {
+        objects.controls.update();
+        objects.renderer.render(objects.scene, objects.camera);
 
         // setTimeout(this.loop, 1, clock, counter);
 
-        requestAnimationFrame(this.loop.bind(null, clock, counter));
+        requestAnimationFrame(this.loop.bind(null, objects));
     }
 
-    onWindowResize = () => {
-        const canv = this.renderer.domElement;
+    onWindowResize = (camera, renderer) => {
+        const canv = renderer.domElement;
 
         const width = canv.clientWidth;
         const height = canv.clientHeight;
 
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
         
-        this.renderer.setPixelRatio( window.devicePixelRatio );
-        this.renderer.setSize(canv.clientWidth, canv.clientHeight, false);
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize(canv.clientWidth, canv.clientHeight, false);
      }
 }
