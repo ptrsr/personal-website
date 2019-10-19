@@ -2,6 +2,7 @@ import { Color, WebGLRenderer, Scene, PerspectiveCamera, Clock } from 'three'
 
 import OrbitControls from '../aux/orbit-controls.js'
 import SVGLoader from '../aux/svg-loader.js'
+import FPSCounter from '../aux/fps-counter.js'
 
 import Globe from './globe.js'
 
@@ -10,9 +11,12 @@ function loop(state) {
     if (!state.looping) {
         return;
     }
-    state.controls.update();
+    // call all updatable functions
+    const deltaTime = state.clock.getDelta();
+    for (let i = 0; i < state.updateables.length; i++) {
+        state.updateables[i](deltaTime);
+    }
     state.renderer.render(state.scene, state.camera);
-
     requestAnimationFrame(loop.bind(null, state));
 }
 
@@ -42,7 +46,10 @@ function init(canvas, settings) {
     controls.enablePan = false;
 
     const clock = new Clock(false);
-    return { scene, clock, controls, renderer, camera, looping: false };
+
+    return { scene, clock, controls, renderer, camera, 
+        updateables: [ controls.update ],
+        looping: false };
 }
 
 function onWindowResize (camera, renderer) {
@@ -61,6 +68,9 @@ export default class Context {
     constructor(canvas, settings) {
         const state = init(canvas, settings);
 
+        const counter = new FPSCounter(document.body);
+        state.updateables.push(counter.record);
+
         // instantiate globe
         const globe = new Globe(0.5);
         globe.setSunPos(Date.now());
@@ -77,10 +87,12 @@ export default class Context {
 
     start = () => {
         this.state.looping = true;
+        this.state.clock.start();
         loop(this.state);
     }
 
     stop = () => {
         this.state.looping = false;
+        this.state.clock.stop();
     }
 }
