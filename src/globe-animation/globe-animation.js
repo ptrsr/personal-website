@@ -44,8 +44,9 @@ export default class GlobeAnimation {
 
         const loader = new SVGLoader();
 
+        
         loader.load('/assets/map.svg', 
-            function(data) {console.log(data)},
+            globe.LoadBorders.bind(null, scene),
             function(xhr) {console.log("loading...")},
             function(error) {console.error(error)}
         );
