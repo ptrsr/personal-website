@@ -1,5 +1,5 @@
 import './style.css';
-import Context from './globe-animation/context.js';
+import Context from './globe/context.js';
 
 
 const canvas = document.getElementById('globe');

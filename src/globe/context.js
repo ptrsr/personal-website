@@ -1,6 +1,7 @@
 import { Color, WebGLRenderer, Scene, PerspectiveCamera, Clock } from 'three'
-import { OrbitControls } from './orbit-controls.js'
-import SVGLoader from './svg-loader.js'
+
+import OrbitControls from '../aux/orbit-controls.js'
+import SVGLoader from '../aux/svg-loader.js'
 
 import Globe from './globe.js'
 
@@ -26,6 +27,7 @@ function init(canvas, settings) {
     // setup renderer
     const renderer = new WebGLRenderer({ canvas });
     renderer.setClearColor(new Color('black'));
+    renderer.setPixelRatio(window.devicePixelRatio);
 
     // update screen resolution
     window.addEventListener( 'resize', onWindowResize.bind(null, camera, renderer), false);
@@ -52,7 +54,6 @@ function onWindowResize (camera, renderer) {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     
-    renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize(canv.clientWidth, canv.clientHeight, false);
  }
 

@@ -55,20 +55,20 @@ export default class Globe extends Mesh {
     }
 
     setSunPos = (date) => {
-        const test = SunCalc.getPosition(date, 90, 0);
+        const sunPos = SunCalc.getPosition(date, 90, 0);
 
-        const q = new Quaternion().setFromEuler(new Euler(-test.altitude, -test.azimuth, 0));
+        const q = new Quaternion().setFromEuler(new Euler(-sunPos.altitude, -sunPos.azimuth, 0));
         const dir = new Vector3(0,0,1).applyQuaternion(q);
 
         this.material.uniforms.lDir.value = dir;
     }
 
     loadBorders = (scene, data) => {
-        const scale = 2.005;
+        const borders = new Group();
+
+        // width and height of SVG
         const width = data.xml.width.animVal.value;
         const height = data.xml.height.animVal.value;
-
-        const borders = new Group();
 
         const material = new RawShaderMaterial({
             vertexShader: mapVertShader,
@@ -89,9 +89,12 @@ export default class Globe extends Mesh {
                 for (let k = 0; k < points.length; k++) {
                     const point = points[k];
 
+                    // TODO: fix the scaling due to SVG cutting off top and bottom
+                    const scale = 2.005;
                     const longitude = Math.PI - (point.x / width - 0.5) * Math.PI * 2 - (Math.PI / 2);
                     const latitude = -(point.y / height - 0.5) * Math.PI * 0.962 - 0.055;
 
+                    // map 2D point to 3D sphere
                     spherePoints.push(
                         Math.cos(latitude) * Math.cos(longitude) / scale,
                         Math.sin(latitude) / scale,

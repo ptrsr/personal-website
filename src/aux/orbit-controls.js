@@ -16,7 +16,7 @@ import { Vector3, EventDispatcher, MOUSE, TOUCH, Quaternion, Spherical, Vector2 
 //    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
 //    Pan - right mouse, or left mouse + ctrl/meta/shiftKey, or arrow keys / touch: two-finger move
 
-export var OrbitControls = function ( object, domElement ) {
+var OrbitControls = function ( object, domElement ) {
 
 	this.object = object;
 
@@ -1171,3 +1171,5 @@ var MapControls = function ( object, domElement ) {
 
 MapControls.prototype = Object.create( EventDispatcher.prototype );
 MapControls.prototype.constructor = MapControls;
+
+export default OrbitControls;
