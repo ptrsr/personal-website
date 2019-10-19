@@ -69,7 +69,6 @@ void main() {
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
 
     vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, lDir, inner, outer);
-
     color += pow(I, vec3(1.2));
 
     // color *= atmosL;
@@ -107,7 +106,7 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
 
     // texture mapping
     vec3 dayMap = texture2D(dayTex, uv).rgb;
-    vec3 normalMap = texture2D(nrmTex, uv).rgb * 2.0 - 1.0;
+    // vec3 normalMap = texture2D(nrmTex, uv).rgb * 2.0 - 1.0;
     vec3 auxMap = texture2D(auxTex, uv).rgb;
     
     float lit = auxMap.r;
@@ -117,23 +116,24 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
 
     // reflection of water
     vec3 reflectDir = reflect(-lightDir, normalDir);
+
+    // TODO: optimize this bit
     float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 15.0) * specular;
 
-    
 
     // clouds
     dayMap = mix(dayMap, vec3(1), vec3(cloud * 1.1));
 
     // normal mapPIng
-    vec3 npole = (modelMatrix * vec4(0, 1, 0, 0)).xyz;
-    vec3 tangent = -cross(normalDir, npole);
-    vec3 biTangent = -cross(tangent, normalDir);
-    mat3 tbn = mat3(tangent, biTangent, normalDir);
+    // vec3 npole = (modelMatrix * vec4(0, 1, 0, 0)).xyz;
+    // vec3 tangent = -cross(normalDir, npole);
+    // vec3 biTangent = -cross(tangent, normalDir);
+    // mat3 tbn = mat3(tangent, biTangent, normalDir);
 
-    vec3 normalMapDir = tbn * normalMap;
+    // vec3 normalMapDir = tbn * normalMap;
 
     // lighting of earth
-    float shadow = max(0.01, dot(normalMapDir, lightDir));
+    float shadow = max(0.01, dot(normalDir, lightDir));
     dayMap *= shadow;
 
     dayMap += lit * pow((1.0 - max(0., dot(lightDir, normalDir) + 0.2)), 5.0);
@@ -181,19 +181,19 @@ float density( vec3 p, float ph, float d ) {
 }
 
 float optic( vec3 p, vec3 q, float ph, float d ) {
-	vec3 s = ( q - p ) / NUM_OUT_SCATTER;
+	vec3 s = ( q - p );
 	vec3 v = p + s * 0.2;
 	
 	float sum = 0.0;
-	for ( float i = 0.0; i < NUM_OUT_SCATTER; i++ ) {
-		sum += density( v, ph, d );
-		v += s;
-	}
+    sum += density( v, ph, d );
 	sum *= length( s );
 	
 	return sum;
 }
 
+
+// amount of MIE shine
+#define SHINE 1.5
 
 vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
 	const float ph_ray = PH_RAY;
@@ -209,38 +209,30 @@ vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
     float n_ray0 = 0.0;
     float n_mie0 = 0.0;
     
-	float len = ( e.y - e.x ) / float( NUM_IN_SCATTER );
+	float len = ( e.y - e.x ) / 5.0;
     vec3 s = -dir * len;
 	vec3 v = -o + -dir * ( e.x + len * 0.5 );
     
+    vec2 f = Sphere( v, l, outer * RED_OUT ) * SHINE;
 
-    float test = min(abs(e.x - e.y) * 2.0, 1.0);
 
-    vec2 f = Sphere( v, l, outer * RED_OUT ) * 1.5;
-    for ( float i = 0.0; i < NUM_IN_SCATTER; i++ ) {   
-		float d_ray = density( v, ph_ray, inner ) * len * 5.0;
-        float d_mie = density( v, ph_mie, inner ) * len;
-        
-        n_ray0 += d_ray;
-        n_mie0 += d_mie;
+    float d_ray = density( v, ph_ray, inner ) * len * 15.0;
+    float d_mie = density( v, ph_mie, inner ) * len;
+    
+    n_ray0 += d_ray;
+    n_mie0 += d_mie;
 
-		vec3 u = v - l * f.y;
-        
-        float n_ray1 = optic( v, u, ph_ray, inner );
-        float n_mie1 = optic( v, u, ph_mie, inner );
-		
-        vec3 att = exp( - ( n_ray0 + n_ray1 ) * k_ray - ( n_mie0 + n_mie1 ) * k_mie * k_mie_ex );
-        
-		sum_ray += d_ray * att;
-        sum_mie += d_mie * att;
+    vec3 u = v - l * f.y;
+    
+    float n_ray1 = optic( v, u, ph_ray, inner );
+    float n_mie1 = optic( v, u, ph_mie, inner );
+    
+    vec3 att = exp( - ( n_ray0 + n_ray1 ) * k_ray - ( n_mie0 + n_mie1 ) * k_mie * k_mie_ex );
+    
+    sum_ray += d_ray * att;
+    sum_mie += d_mie * att;
 
-        v += s; // HACK
 
-        if (i >= test * NUM_IN_SCATTER) {
-            break;
-        }
-	}
-	
 	float c  = dot( dir, -l );
 	float cc = c * c;
     vec3 scatter =

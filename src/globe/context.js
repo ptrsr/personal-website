@@ -1,7 +1,6 @@
 import { Color, WebGLRenderer, Scene, PerspectiveCamera, Clock } from 'three'
 
 import OrbitControls from '../aux/orbit-controls.js'
-import SVGLoader from '../aux/svg-loader.js'
 import FPSCounter from '../aux/fps-counter.js'
 
 import Globe from './globe.js'
@@ -74,13 +73,8 @@ export default class Context {
         // instantiate globe
         const globe = new Globe(0.5);
         globe.setSunPos(Date.now());
+        // globe.loadBorders('/assets/map.svg');
         state.scene.add(globe);
-
-        new SVGLoader().load('/assets/map.svg', 
-            globe.loadBorders.bind(null, state.scene),
-            function(xhr) {console.log("loading...")},
-            function(error) {console.error(error)}
-        );
 
         this.state = state;
     }
