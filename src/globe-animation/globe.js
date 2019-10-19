@@ -54,7 +54,7 @@ export default class Globe extends Mesh {
         }
     }
 
-    SetSun = (date) => {
+    setSunPos = (date) => {
         const test = SunCalc.getPosition(date, 90, 0);
 
         const q = new Quaternion().setFromEuler(new Euler(-test.altitude, -test.azimuth, 0));
@@ -63,7 +63,7 @@ export default class Globe extends Mesh {
         this.material.uniforms.lDir.value = dir;
     }
 
-    LoadBorders = (scene, data) => {
+    loadBorders = (scene, data) => {
         const scale = 2.005;
         const width = data.xml.width.animVal.value;
         const height = data.xml.height.animVal.value;
