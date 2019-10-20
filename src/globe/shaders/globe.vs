@@ -9,7 +9,7 @@ uniform vec3 cameraPosition;
 
 uniform float scale;
 
-attribute vec3 vertexPos;
+attribute vec3 position;
 varying vec3 fragPos;
 
 // sPos : position of sphere in 2D, where the Y should be perpendicular to camera plane
@@ -46,14 +46,14 @@ void main() {
     modelViewMatrix[2][2] = scale; 
 
     // position of render plane vertex relative to camera
-    vec4 viewPos = modelViewMatrix * vec4(vertexPos, 1);
+    vec4 viewPos = modelViewMatrix * vec4(position, 1);
 
     // position of sphere center relative to camera
     vec4 spherePos = viewMatrix * modelMatrix[3];
 
     // extend plane sides for complete render of sphere
-    viewPos.x += perspectiveCorrect(spherePos.xz, vertexPos.x);
-    viewPos.y += perspectiveCorrect(spherePos.yz, vertexPos.y);
+    viewPos.x += perspectiveCorrect(spherePos.xz, position.x);
+    viewPos.y += perspectiveCorrect(spherePos.yz, position.y);
 
     // forward world pos of vertex to fragment shader
     fragPos = (invViewMatrix * viewPos).xyz;

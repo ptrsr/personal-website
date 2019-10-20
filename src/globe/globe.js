@@ -1,4 +1,4 @@
-import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3, Quaternion, Euler, Group } from "three";
+import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3, Quaternion, Euler, Group, PlaneGeometry } from "three";
 import { RepeatWrapping, Line } from "three";
 
 import SunCalc from 'suncalc';
@@ -13,16 +13,7 @@ import mapFragShader from './shaders/map.fs'
 
 export default class Globe extends Mesh {
     constructor(scale = 1) {
-        // simple plane geometry
-        const geometry = new BufferGeometry();
-        geometry.addAttribute("vertexPos", new Float32BufferAttribute([
-             1,  1, 0,  // TR
-            -1,  1, 0,  // TL
-             1, -1, 0,  // BR
-            -1, -1, 0], // BL
-            3)
-        );
-        geometry.setIndex([ 0, 1, 2, 1, 3, 2 ]);
+        const geometry = new PlaneGeometry(2, 2);
 
         const loader = new TextureLoader();
         const dayTex = loader.load('assets/earth/earth-day.jpg');
@@ -45,7 +36,8 @@ export default class Globe extends Mesh {
 
             },
             vertexShader: globeVertShader,
-            fragmentShader: globeFragShader
+            fragmentShader: globeFragShader,
+            transparent: true
         });
 
         // mesh constructor

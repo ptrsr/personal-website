@@ -4,7 +4,7 @@ import OrbitControls from '../aux/orbit-controls.js'
 import FPSCounter from '../aux/fps-counter.js'
 
 import Globe from './globe.js'
-
+import Stars from './stars.js'
 
 function loop(state) {
     if (!state.looping) {
@@ -24,7 +24,7 @@ function init(canvas, settings) {
     const scene = new Scene();
 
     // setup camera
-    const camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 0, 3);
 
     // setup renderer
@@ -75,6 +75,10 @@ export default class Context {
         globe.setSunPos(Date.now());
         // globe.loadBorders('/assets/map.svg');
         state.scene.add(globe);
+
+        // stars
+        const stars = new Stars(state.renderer, 1500);
+        state.scene.background = stars.cube;
 
         this.state = state;
     }
