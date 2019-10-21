@@ -1,7 +1,6 @@
 precision highp float;
 #extension GL_OES_standard_derivatives : enable
 
-#define LIGHT_DIR normalize(vec3(1, 0.3, 1))
 #define PI 3.14159265359
 #define MAX 10000
 
@@ -68,12 +67,22 @@ void main() {
 
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
 
+
     vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, lDir, inner, outer);
     color += pow(I, vec3(1.2));
 
-    // color *= atmosL;
+    // calculate world normal
+    vec3 worldPos = (ray * outerSphereHits.x);
+    vec3 normalDir = normalize(cameraPosition - worldPos);
 
-    gl_FragColor = vec4(color, 1);
+
+    // transparent atmosphere
+    float t = min(1.0, 1.0 - dot(normalDir, ray) + 0.13);
+    t = pow(t, 5.);
+
+    t = 1. - t;
+    t = min(1., t * 5.);
+    gl_FragColor = vec4(color, t);
 }
 
 // ray intersects sphere

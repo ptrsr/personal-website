@@ -4,7 +4,8 @@ import OrbitControls from '../aux/orbit-controls.js'
 import FPSCounter from '../aux/fps-counter.js'
 
 import Globe from './globe.js'
-import Stars from './stars.js'
+import Sun from './sun.js'
+import CreateStars from './stars.js'
 
 function loop(state) {
     if (!state.looping) {
@@ -28,7 +29,7 @@ function init(canvas, settings) {
     camera.position.set(0, 0, 3);
 
     // setup renderer
-    const renderer = new WebGLRenderer({ canvas });
+    const renderer = new WebGLRenderer({ canvas, antialias: true });
     renderer.setClearColor(new Color('black'));
     renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -70,15 +71,18 @@ export default class Context {
         const counter = new FPSCounter(document.body);
         state.updateables.push(counter.record);
 
+        // sun
+        const sun = new Sun(Date.now());
+        // state.scene.add(sun);
+
         // instantiate globe
         const globe = new Globe(0.5);
-        globe.setSunPos(Date.now());
-        // globe.loadBorders('/assets/map.svg');
         state.scene.add(globe);
+        globe.setSunDir(sun.dir);
+        // globe.loadBorders('/assets/map.svg');
 
         // stars
-        const stars = new Stars(state.renderer, 1500);
-        state.scene.background = stars.cube;
+        state.scene.background = CreateStars(state.renderer, 1500);
 
         this.state = state;
     }

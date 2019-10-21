@@ -1,10 +1,9 @@
-import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3, Quaternion, Euler, Group, PlaneGeometry } from "three";
+import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3, Group, PlaneGeometry } from "three";
 import { RepeatWrapping, Line } from "three";
 
-import SunCalc from 'suncalc';
 import SVGLoader from '../aux/svg-loader.js'
 
-import globeVertShader from './shaders/globe.vs'
+import sphereVertShader from './shaders/sphere.vs'
 import globeFragShader from './shaders/globe.fs'
 
 import mapVertShader from './shaders/map.vs'
@@ -35,7 +34,7 @@ export default class Globe extends Mesh {
                 nrmTex: { type: 't', value: nrmTex },
 
             },
-            vertexShader: globeVertShader,
+            vertexShader: sphereVertShader,
             fragmentShader: globeFragShader,
             transparent: true
         });
@@ -48,12 +47,7 @@ export default class Globe extends Mesh {
         }
     }
 
-    setSunPos = (date) => {
-        const sunPos = SunCalc.getPosition(date, 90, 0);
-
-        const q = new Quaternion().setFromEuler(new Euler(-sunPos.altitude, -sunPos.azimuth, 0));
-        const dir = new Vector3(0,0,1).applyQuaternion(q);
-
+    setSunDir = (dir) => {
         this.material.uniforms.lDir.value = dir;
     }
 
@@ -86,7 +80,7 @@ export default class Globe extends Mesh {
                         const point = points[k];
     
                         // TODO: fix the scaling due to SVG cutting off top and bottom
-                        const scale = 2.005;
+                        const scale = 2.02;
                         const longitude = Math.PI - (point.x / width - 0.5) * Math.PI * 2 - (Math.PI / 2);
                         const latitude = -(point.y / height - 0.5) * Math.PI * 0.962 - 0.055;
     
