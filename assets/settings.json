@@ -1,0 +1,23 @@
+{
+  "test": 32, 
+  "toplel": "yes",
+  
+  "camera": {
+    "fov": 40,
+    "near": 0.1,
+    "far": 10000
+  },
+
+  "controls": {
+    "distance": {
+      "min": 2,
+      "max": 5
+    },
+    "damping": 0.05,
+    "rotateSpeed": 0.02
+  },
+
+  "globe": {
+    
+  }
+}

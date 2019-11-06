@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack-dev-server --config webpack-d.config.js --open --host 0.0.0.0"
+    "start": "webpack-dev-server --config webpack-d.config.js --open --host localhost"
   },
   "repository": {
     "type": "git",
@@ -26,10 +26,12 @@
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.0.4",
     "css-loader": "^3.2.0",
+    "dat.gui": "^0.7.6",
     "file-loader": "^4.2.0",
     "html-webpack-plugin": "^3.2.0",
     "raw-loader": "^3.1.0",
     "style-loader": "^1.0.0",
+    "terser-webpack-plugin": "^2.2.1",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.7",
@@ -37,6 +39,7 @@
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "babel-preset-env": "^1.7.0",
     "suncalc": "^1.8.0",
     "three": "^0.108.0"
   },

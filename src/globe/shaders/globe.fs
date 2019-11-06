@@ -95,7 +95,6 @@ vec2 Sphere(vec3 origin, vec3 ray, float radius) {
 	if (d < 0.0) {
 		return vec2(MAX, -MAX);
 	}
-
 	d = sqrt(d);
 	return vec2(b-d, b+d);
 }

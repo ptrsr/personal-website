@@ -15,9 +15,9 @@ export default class Globe extends Mesh {
         const geometry = new PlaneGeometry(2, 2);
 
         const loader = new TextureLoader();
-        const dayTex = loader.load('assets/earth/earth-day.jpg');
-        const auxTex = loader.load('assets/earth/earth-aux.jpg');
-        const nrmTex = loader.load('assets/earth/earth-nrm.jpg');
+        const dayTex = loader.load('public/earth/earth-day.jpg');
+        const auxTex = loader.load('public/earth/earth-aux.jpg');
+        const nrmTex = loader.load('public/earth/earth-nrm.jpg');
         
         dayTex.wrapS = RepeatWrapping;
         auxTex.wrapS = RepeatWrapping;

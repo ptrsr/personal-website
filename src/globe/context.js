@@ -25,11 +25,19 @@ function init(canvas, settings) {
     const scene = new Scene();
 
     // setup camera
-    const camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0, 3);
-
+    const camera = new PerspectiveCamera(
+        settings.camera.fov, 
+        window.innerWidth / window.innerHeight, 
+        settings.camera.near, 
+        settings.camera.far
+    );
+    {
+        const distance = settings.controls.distance;
+        camera.position.set(0, 0, (distance.max - distance.min) / 2 + distance.min);
+    }
+    
     // setup renderer
-    const renderer = new WebGLRenderer({ canvas, antialias: true });
+    const renderer = new WebGLRenderer({ canvas, antialias: false });
     renderer.setClearColor(new Color('black'));
     renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -38,12 +46,7 @@ function init(canvas, settings) {
     window.dispatchEvent(new Event('resize'));
 
     // setup controls
-    const controls = new OrbitControls(camera);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 2;
-    controls.maxDistance = 10;
-    controls.enablePan = false;
+    const controls = new OrbitControls(camera, undefined, settings.controls);
 
     const clock = new Clock(false);
 
@@ -73,13 +76,13 @@ export default class Context {
 
         // sun
         const sun = new Sun(Date.now());
-        // state.scene.add(sun);
+        state.scene.add(sun);
 
         // instantiate globe
-        const globe = new Globe(0.5);
+        const globe = new Globe(.5);
         state.scene.add(globe);
         globe.setSunDir(sun.dir);
-        // globe.loadBorders('/assets/map.svg');
+        // globe.loadBorders('/public/map.svg');
 
         // stars
         state.scene.background = CreateStars(state.renderer, 1500);

@@ -16,7 +16,7 @@ import { Vector3, EventDispatcher, MOUSE, TOUCH, Quaternion, Spherical, Vector2 
 //    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
 //    Pan - right mouse, or left mouse + ctrl/meta/shiftKey, or arrow keys / touch: two-finger move
 
-var OrbitControls = function ( object, domElement ) {
+var OrbitControls = function ( object, domElement, settings ) {
 
 	this.object = object;
 
@@ -29,8 +29,8 @@ var OrbitControls = function ( object, domElement ) {
 	this.target = new Vector3();
 
 	// How far you can dolly in and out ( PerspectiveCamera only )
-	this.minDistance = 0;
-	this.maxDistance = Infinity;
+	this.minDistance = settings.distance.min;
+	this.maxDistance = settings.distance.max;
 
 	// How far you can zoom in and out ( OrthographicCamera only )
 	this.minZoom = 0;
@@ -48,8 +48,8 @@ var OrbitControls = function ( object, domElement ) {
 
 	// Set to true to enable damping (inertia)
 	// If damping is enabled, you must call controls.update() in your animation loop
-	this.enableDamping = false;
-	this.dampingFactor = 0.05;
+	this.enableDamping = Boolean(settings.damping);
+	this.dampingFactor = settings.damping;
 
 	// This option actually enables dollying in and out; left as "zoom" for backwards compatibility.
 	// Set to false to disable zooming
@@ -58,10 +58,10 @@ var OrbitControls = function ( object, domElement ) {
 
 	// Set to false to disable rotating
 	this.enableRotate = true;
-	this.rotateSpeed = 1.0;
+	this.rotateSpeed = settings.rotateSpeed;
 
 	// Set to false to disable panning
-	this.enablePan = true;
+	this.enablePan = false;
 	this.panSpeed = 1.0;
 	this.screenSpacePanning = false; // if true, pan in screen-space
 	this.keyPanSpeed = 7.0;	// pixels moved per arrow key push
@@ -749,13 +749,11 @@ var OrbitControls = function ( object, domElement ) {
 	//
 
 	function onMouseDown( event ) {
-        console.log(true);
-
 		if ( scope.enabled === false ) return;
 
 		// Prevent the browser from scrolling.
 
-		event.preventDefault();
+		// event.preventDefault();
 
 		// Manually set the focus since calling preventDefault above
 		// prevents the browser from setting it automatically.

@@ -6,6 +6,8 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+process.env.NODE_ENV = 'production'
+
 module.exports = {
     entry: './src/index.js',
     mode: 'production',
@@ -40,10 +42,11 @@ module.exports = {
         new HtmlWebpackPlugin({ hash: true, template: './src/index.html' }),
         new webpack.HashedModuleIdsPlugin(),
         new CleanWebpackPlugin(),
+        new webpack.EnvironmentPlugin(['NODE_ENV']),
         new CopyWebpackPlugin([ 
             { from: 'CNAME' },
-            { from: 'public', to: 'assets' },
-        ]) 
+            { from: 'public', to: 'public' },
+        ])
     ],
 
     module: {

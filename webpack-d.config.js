@@ -3,6 +3,9 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
+
+process.env.NODE_ENV = 'development'
 
 module.exports = {
     entry: './src/index.js',
@@ -40,8 +43,9 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({ hash: true, template: './src/index.html' }),
         new CleanWebpackPlugin(),
+        new webpack.EnvironmentPlugin(['NODE_ENV']),
         new CopyWebpackPlugin([ 
-            { from:'public', to:'assets' }
+            { from:'public', to:'public' }
         ])
     ],
 
