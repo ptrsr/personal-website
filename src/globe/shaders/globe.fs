@@ -2,7 +2,6 @@ precision highp float;
 #extension GL_OES_standard_derivatives : enable
 
 #define PI 3.14159265359
-#define MAX 10000
 
 uniform mat4 invViewMatrix;
 uniform mat4 modelMatrix;
@@ -72,14 +71,15 @@ void main() {
     // transparent atmosphere
     float t = min(1.0, 1.0 - dot(normalDir, ray) + 0.14);
     t = pow(t, 5.);
-
     t = 1. - t;
     t = min(1., t * 5.);
+
     gl_FragColor = vec4(color, t);
 }
 
 // ray intersects sphere
 // e = -b +/- sqrt( b^2 - c )
+#define MAX 10000
 vec2 Sphere(vec3 origin, vec3 ray, float radius) {
 	float b = dot(origin, ray);
 	float c = dot(origin, origin) - radius * radius;

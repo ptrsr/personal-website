@@ -13,3 +13,15 @@ if (process.env.NODE_ENV === 'development') {
     new DevInterface(settings, context.state);
 }
 
+const fullscreenButton = document.getElementById('fullscreen');
+const header = document.getElementsByTagName('header')[0];
+
+fullscreenButton.onclick = toggleFullcreen.bind(null, header, fullscreen);
+function toggleFullcreen(element) {
+    var isFullscreen = document.webkitIsFullScreen || document.mozFullScreen || false;
+
+	element.requestFullScreen = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || function () { return false; };
+	document.cancelFullScreen = document.cancelFullScreen || document.webkitCancelFullScreen || document.mozCancelFullScreen || function () { return false; };
+
+	isFullscreen ? document.cancelFullScreen() : element.requestFullScreen();
+}
