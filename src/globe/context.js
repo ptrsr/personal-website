@@ -16,6 +16,7 @@ function loop(state) {
     for (let i = 0; i < state.updateables.length; i++) {
         state.updateables[i](deltaTime);
     }
+
     state.renderer.render(state.scene, state.camera);
     requestAnimationFrame(loop.bind(null, state));
 }
@@ -32,8 +33,7 @@ function init(canvas, settings) {
         settings.camera.far
     );
     {
-        const distance = settings.controls.distance;
-        camera.position.set(0, 0, (distance.max - distance.min) / 2 + distance.min);
+        camera.position.set(0, 0, settings.camera.controls.distance.start);
     }
     
     // setup renderer
@@ -46,7 +46,7 @@ function init(canvas, settings) {
     window.dispatchEvent(new Event('resize'));
 
     // setup controls
-    const controls = new OrbitControls(camera, undefined, settings.controls);
+    const controls = new OrbitControls(camera, canvas, settings.camera.controls);
 
     const clock = new Clock(false);
 
@@ -69,6 +69,11 @@ function onWindowResize (camera, renderer) {
 
 export default class Context {
     constructor(canvas, settings) {
+
+        canvas.onmouseout = function() {
+            console.log('no')
+        }
+
         const state = init(canvas, settings);
 
         const counter = new FPSCounter(document.body);
@@ -79,13 +84,15 @@ export default class Context {
         state.scene.add(sun);
 
         // instantiate globe
-        const globe = new Globe(.5);
+        const globe = new Globe(settings.globe);
         state.scene.add(globe);
         globe.setSunDir(sun.dir);
         // globe.loadBorders('/public/map.svg');
 
         // stars
         state.scene.background = CreateStars(state.renderer, 1500);
+
+        state.objects = { globe, sun };
 
         this.state = state;
     }

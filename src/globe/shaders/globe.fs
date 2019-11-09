@@ -4,29 +4,22 @@ precision highp float;
 #define PI 3.14159265359
 #define MAX 10000
 
-
-// scatter const
-#define RATIO 0.99
-#define RED_OUT 1.0 // TODO: remove
-
-#define ATMOS_REACH .005
-#define ATMOS_SCALE 40.0
-#define SHINE_THROUGH 0.88
-
-#define NUM_OUT_SCATTER 1.0
-#define NUM_IN_SCATTER 4.0
-
-#define PH_RAY 0.8
-#define PH_MIE 0.05
-
-
-
-uniform vec3 cameraPosition;
-uniform float scale;
 uniform mat4 invViewMatrix;
 uniform mat4 modelMatrix;
+
+uniform vec3 cameraPosition;
 uniform vec3 lDir;
 
+uniform float scale;
+
+uniform vec3 a_color;
+uniform float a_brightness;
+uniform float a_reflection;
+uniform float a_ray;
+uniform float a_mie;
+uniform float a_spread;
+uniform float a_thick;
+uniform float a_test;
 
 uniform sampler2D dayTex;
 uniform sampler2D nrmTex;
@@ -34,12 +27,14 @@ uniform sampler2D auxTex;
 
 varying vec3 fragPos;
 
+
 vec2 Sphere(vec3 origin, vec3 ray, float radius);
 vec3 MapUV(vec3 normal, vec3 ray, vec3 lightDir);
-vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer );
+vec3 in_scatter(vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer);
+
 
 void main() {
-    float inner = scale * RATIO;
+    float inner = scale * .99;
     float outer = scale;
 
     vec3 color = vec3(0);
@@ -67,17 +62,15 @@ void main() {
 
     outerSphereHits.y = min(outerSphereHits.y, innerSphereHits.x);
 
-
     vec3 I = in_scatter( cameraPosition, ray, -outerSphereHits.yx, lDir, inner, outer);
-    color += pow(I, vec3(1.2));
+    color += pow(I, vec3(1));
 
     // calculate world normal
     vec3 worldPos = (ray * outerSphereHits.x);
     vec3 normalDir = normalize(cameraPosition - worldPos);
 
-
     // transparent atmosphere
-    float t = min(1.0, 1.0 - dot(normalDir, ray) + 0.13);
+    float t = min(1.0, 1.0 - dot(normalDir, ray) + 0.14);
     t = pow(t, 5.);
 
     t = 1. - t;
@@ -114,7 +107,6 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
 
     // texture mapping
     vec3 dayMap = texture2D(dayTex, uv).rgb;
-    // vec3 normalMap = texture2D(nrmTex, uv).rgb * 2.0 - 1.0;
     vec3 auxMap = texture2D(auxTex, uv).rgb;
     
     float lit = auxMap.r;
@@ -132,14 +124,6 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
     // clouds
     dayMap = mix(dayMap, vec3(1), vec3(cloud * 1.1));
 
-    // normal mapPIng
-    // vec3 npole = (modelMatrix * vec4(0, 1, 0, 0)).xyz;
-    // vec3 tangent = -cross(normalDir, npole);
-    // vec3 biTangent = -cross(tangent, normalDir);
-    // mat3 tbn = mat3(tangent, biTangent, normalDir);
-
-    // vec3 normalMapDir = tbn * normalMap;
-
     // lighting of earth
     float shadow = max(0.01, dot(normalDir, lightDir));
     dayMap *= shadow;
@@ -151,102 +135,67 @@ vec3 MapUV(vec3 normalDir, vec3 ray, vec3 lightDir) {
     return dayMap;
 }
 
-
-
-// // math const
-// const float MAX = 10000.0;
-
-
-
 // Mie
 // g : ( -0.75, -0.999 )
 //      3 * ( 1 - g^2 )               1 + c^2
 // F = ----------------- * -------------------------------
 //      8PI * ( 2 + g^2 )     ( 1 + g^2 - 2 * g * c )^(3/2)
-float phase_mie( float g, float c, float cc ) {
+float phase_mie(float g, float c, float cc) {
 	float gg = g * g;
 	
-	float a = ( 1.0 - gg ) * ( 1.0 + cc );
+	float a = (1.0 - gg) * (1.0 + cc);
 
 	float b = 1.0 + gg - 2.0 * g * c;
-	b *= sqrt( b );
+	b *= sqrt(b);
 	b *= 2.0 + gg;	
 	
-	return ( 3.0 / 8.0 / PI ) * a / b;
+	return (3.0 / 8.0 / PI) * a / b;
 }
 
 // Rayleigh
 // g : 0
 // F = 3/16PI * ( 1 + c^2 )
-float phase_ray( float cc ) {
-	return ( 3.0 / 16.0 / PI ) * ( 1.0 + cc );
+float phase_ray(float cc) {
+	return (3.0 / 16.0 / PI) * (1.0 + cc);
 }
 
 
-
-float density( vec3 p, float ph, float d ) {
-	return exp( -max( length( p ) - d, 0.0 ) / (ph * ATMOS_REACH) );
+float density(vec3 p, float d) {
+	return exp(-max(length(p) - d, 0.0));
 }
 
-float optic( vec3 p, vec3 q, float ph, float d ) {
-	vec3 s = ( q - p );
-	vec3 v = p + s * 0.2;
-	
-	float sum = 0.0;
-    sum += density( v, ph, d );
-	sum *= length( s );
-	
-	return sum;
+float optic(vec3 p, vec3 q, float d) {
+	vec3 s = (q - p);
+	vec3 v = p + s;
+	return density(v, d) * length(s);
 }
 
-
-// amount of MIE shine
-#define SHINE 1.5
-
-vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer ) {
-	const float ph_ray = PH_RAY;
-    const float ph_mie = PH_MIE;
+vec3 in_scatter(vec3 o, vec3 dir, vec2 e, vec3 l, float inner, float outer) {
+    vec3 k_ray = a_color * .1;
     
-    const vec3 k_ray = vec3( 7.8, 10.5, 17.1 ) * .5;
-    const vec3 k_mie = vec3( 27 );
-    float k_mie_ex = -0.05 * max(-0.2, min(1.0, .5 + dot( dir, -l ) * 3.0));
-    
-	vec3 sum_ray = vec3( 0.0 );
-    vec3 sum_mie = vec3( 0.0 );
-    
-    float n_ray0 = 0.0;
-    float n_mie0 = 0.0;
-    
-	float len = ( e.y - e.x ) / 5.0;
+	float len = (e.y - e.x) / (scale * 6.0);
     vec3 s = -dir * len;
-	vec3 v = -o + -dir * ( e.x + len * 0.5 );
+	vec3 v = -o + -dir * (e.x + len * 0.5);
     
-    vec2 f = Sphere( v, l, outer * RED_OUT ) * SHINE;
+    vec2 f = Sphere(v, l, outer) * (a_spread / scale);
 
-
-    float d_ray = density( v, ph_ray, inner ) * len * 15.0;
-    float d_mie = density( v, ph_mie, inner ) * len;
+    float d_ray = pow(density(v, inner) * len * a_ray, a_thick);
+    float d_mie = pow(density(v, inner) * len * a_mie, a_test);
     
-    n_ray0 += d_ray;
-    n_mie0 += d_mie;
-
     vec3 u = v - l * f.y;
     
-    float n_ray1 = optic( v, u, ph_ray, inner );
-    float n_mie1 = optic( v, u, ph_mie, inner );
+    float n_ray1 = optic(v, u, inner);
+    float n_mie1 = optic(v, u, inner);
     
-    vec3 att = exp( - ( n_ray0 + n_ray1 ) * k_ray - ( n_mie0 + n_mie1 ) * k_mie * k_mie_ex );
+    vec3 att = exp(-(d_ray + n_ray1) * k_ray - (d_mie + n_mie1));
     
-    sum_ray += d_ray * att;
-    sum_mie += d_mie * att;
-
-
-	float c  = dot( dir, -l );
+	float c  = dot(dir, -l);
 	float cc = c * c;
-    vec3 scatter =
-        sum_ray * k_ray * phase_ray( cc / 1000. ) +
-     	sum_mie * k_mie * phase_mie(SHINE_THROUGH, c, cc );
-    
+
+    vec3 ray = d_ray * att * k_ray * phase_ray(cc);
+    vec3 mie = d_mie * att * phase_mie(a_reflection, c, cc);
+
+    vec3 scatter = ray + mie;
 	
-	return ATMOS_SCALE * scatter;
+	return a_brightness * scatter;
 }

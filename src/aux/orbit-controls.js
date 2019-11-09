@@ -291,6 +291,7 @@ var OrbitControls = function ( object, domElement, settings ) {
 
 	// current position in spherical coordinates
 	var spherical = new Spherical();
+	scope.spherical = spherical;
 	var sphericalDelta = new Spherical();
 
 	var scale = 1;

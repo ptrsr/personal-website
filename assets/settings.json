@@ -1,23 +1,33 @@
 {
-  "test": 32, 
-  "toplel": "yes",
-  
   "camera": {
-    "fov": 40,
-    "near": 0.1,
-    "far": 10000
-  },
-
-  "controls": {
+   "fov": 40,
+   "near": 0.1,
+   "far": 10000,
+   "controls": {
     "distance": {
-      "min": 2,
-      "max": 5
+     "start": 5,
+     "min": 4,
+     "max": 10
     },
     "damping": 0.05,
-    "rotateSpeed": 0.02
+    "rotateSpeed": 1
+   }
   },
-
   "globe": {
-    
+   "scale": 1,
+   "atmosphere": {
+    "color": [
+     89.99999999999999,
+     124.05405405405409,
+     179.99999999999997
+    ],
+    "brightness": 31,
+    "reflection": 0.89,
+    "ray": 30.699999999999932,
+    "mie": 0.000001,
+    "spread": 0.2699999999999997,
+    "thick": 2.5000000000000004,
+    "test": 0.19999999999999976
+   }
   }
-}
+ }

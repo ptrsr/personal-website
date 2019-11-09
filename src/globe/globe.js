@@ -11,7 +11,7 @@ import mapFragShader from './shaders/map.fs'
 
 
 export default class Globe extends Mesh {
-    constructor(scale = 1) {
+    constructor(settings) {
         const geometry = new PlaneGeometry(2, 2);
 
         const loader = new TextureLoader();
@@ -28,7 +28,18 @@ export default class Globe extends Mesh {
             uniforms: {
                 lDir: { value: new Vector3() },
                 invViewMatrix: { value: new Matrix4() },
-                scale: { value: scale },
+                scale: { value: settings.scale },
+                
+                a_color: { value: settings.atmosphere.color },
+                a_brightness: { value: settings.atmosphere.brightness },
+                a_reflection: { value: settings.atmosphere.reflection },
+                a_ray: { value: settings.atmosphere.ray },
+                a_mie: { value: settings.atmosphere.mie },
+                a_spread: { value: settings.atmosphere.spread },
+                a_thick: { value: settings.atmosphere.thick },
+                a_test: { value: settings.atmosphere.test },
+
+
                 dayTex: { type: 't', value: dayTex },
                 auxTex: { type: 't', value: auxTex },
                 nrmTex: { type: 't', value: nrmTex },
