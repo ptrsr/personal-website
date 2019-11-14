@@ -15,18 +15,16 @@ export default class Globe extends Mesh {
         const geometry = new PlaneGeometry(2, 2);
 
         const loader = new TextureLoader();
-        const dayTex = loader.load('public/earth/earth-day.jpg');
-        const auxTex = loader.load('public/earth/earth-aux.jpg');
-        const nrmTex = loader.load('public/earth/earth-nrm.jpg');
+        const t_day = loader.load('public/earth/earth-day.jpg');
+        const t_aux = loader.load('public/earth/earth-aux.jpg');
         
-        dayTex.wrapS = RepeatWrapping;
-        auxTex.wrapS = RepeatWrapping;
-        nrmTex.wrapS = RepeatWrapping;
+        t_day.wrapS = RepeatWrapping;
+        t_aux.wrapS = RepeatWrapping;
 
         // globe shader
         const material = new RawShaderMaterial({
             uniforms: {
-                lDir: { value: new Vector3() },
+                sunLightDir: { value: new Vector3() },
                 invViewMatrix: { value: new Matrix4() },
                 scale: { value: settings.scale },
                 
@@ -40,9 +38,8 @@ export default class Globe extends Mesh {
                 a_test: { value: settings.atmosphere.test },
 
 
-                dayTex: { type: 't', value: dayTex },
-                auxTex: { type: 't', value: auxTex },
-                nrmTex: { type: 't', value: nrmTex },
+                t_day: { type: 't', value: t_day },
+                t_aux: { type: 't', value: t_aux },
 
             },
             vertexShader: sphereVertShader,
@@ -59,7 +56,7 @@ export default class Globe extends Mesh {
     }
 
     setSunDir = (dir) => {
-        this.material.uniforms.lDir.value = dir;
+        this.material.uniforms.sunLightDir.value = dir;
     }
 
     loadBorders = (svgUrl) => {
