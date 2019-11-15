@@ -88,7 +88,7 @@ export default class Globe extends Mesh {
                         const point = points[k];
     
                         // TODO: fix the scaling due to SVG cutting off top and bottom
-                        const scale = 2.02;
+                        const scale = 1.02;
                         const longitude = Math.PI - (point.x / width - 0.5) * Math.PI * 2 - (Math.PI / 2);
                         const latitude = -(point.y / height - 0.5) * Math.PI * 0.962 - 0.055;
     

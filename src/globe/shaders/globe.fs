@@ -134,12 +134,6 @@ vec3 globeTexture(vec3 normalDir, vec3 ray, vec3 lightDir) {
     // cloud density
     float cloud = c_aux.b;
 
-    // ideal reflection dir for water
-    vec3 reflectDir = reflect(-lightDir, normalDir);
-
-    // TODO: optimize this bit
-    float reflectAmount = pow(max(dot(ray, reflectDir), 0.0), 15.0) * specular;
-
     // add clouds
     c_day = mix(c_day, vec3(1), vec3(cloud * 1.1));
 
@@ -147,9 +141,17 @@ vec3 globeTexture(vec3 normalDir, vec3 ray, vec3 lightDir) {
     float shadow = max(0.01, dot(normalDir, lightDir));
     c_day *= shadow;
 
+    // ideal reflection dir for water
+    vec3 reflectDir = reflect(-lightDir, normalDir);
+    
+    // TODO: optimize this bit
+    float reflectAmount = max(dot(ray, reflectDir), 0.0) * specular * .88;
+
+    reflectAmount = pow(reflectAmount, 10.);
+    c_day += vec3(reflectAmount);
+
     c_day += lights * pow((1.0 - max(0., dot(lightDir, normalDir) + 0.2)), 5.0);
 
-    c_day = mix(c_day, vec3(1), reflectAmount / 2.0);
 
     return c_day;
 }
@@ -199,35 +201,34 @@ vec3 atmosphere(vec3 o, vec3 dir, vec2 e, vec3 l, vec2 diameters) {
     // atmosphere density
     float density = calcDensity(v, diameters.x) * dist;
 
-    float reflection = pow(density * a_ray, a_thick);
-    float refraction = pow(density * a_mie, a_test);
-    
+    float reflection = pow(-density * a_ray, a_thick);
+    float refraction = pow(-density * a_mie, a_test);
+
     // amount of distance the light traveled in the atmosphere
     vec2 f = sphere(v, l, diameters.y) * (a_spread / scale);
     // position where the light enters the atmosphere
     vec3 u = v - l * f.y;
-    
+
     float optic = calcOptic(v, u, diameters.x);
-    
     // globe lighting
     float gLit = dot(dir, -l);
 
     // slow fadeout on side
-    float fade = 0.7 + gLit * .8;
+    float fade = 0.7 + gLit * 0.8;
 
     // atmosphere direct lighting
     vec3 pos = normalize(o + dir * e.x);
     float aLit = dot(l, pos) * 1.5;
 
     // darken atmosphere on sides
-    reflection *= min(1., max(0., fade + aLit));
+    reflection *= min(1.0, max(0.0, fade + aLit));
 
     // atmosphere color
     vec3 color = a_color * ATMOS_MULTI;
 
     // red color grading
     vec3 grading = exp(-optic * color - (refraction + optic));
-    
+
     // brightness adjustment
 	float gg = gLit * gLit;
     vec3 ray = reflection * grading * color * calcRayPhase(gg);
