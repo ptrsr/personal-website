@@ -115,6 +115,11 @@ vec2 uvMap(vec3 normalDir) {
     float t_b = fract(t + 1.0) - 0.5;
     
     return vec2(
+        t_a,
+        0.5 - asin(-normalDir.y) / PI
+    );
+
+    return vec2(
         fwidth(t_a) < fwidth(t_b) ? t_a : t_b,
         0.5 - asin(-normalDir.y) / PI
     );
