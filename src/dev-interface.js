@@ -17,75 +17,80 @@ function exposeUniform(parent, func, name, settings, parameter) {
 export default class DevInterface {
     constructor(settings, state) {
         const gui = new dat.GUI({ load: settings });
+        gui.toggleHide();
 
         gui.add({ Save : saveToClipboard.bind(null, settings) }, 'Save');
 
-        // camera
-        const camera_folder = gui.addFolder("Camera");
-
-        // fov
-        const fov = camera_folder.add(settings.camera, 'fov');
-        fov.onChange(function(value) {
-            this.setFocalLength(value);
-            settings.camera.fov = value;
-        }.bind(state.camera));
-
-
-        const globe_folder = gui.addFolder("Globe");
+        const globeFolder = gui.addFolder("Globe");
 
         exposeUniform(
-            globe_folder, 'add', 'scale',
+            globeFolder, 'add', 'scale',
             settings.globe, 
             state.objects.globe.material.uniforms.scale
         );
+        
+        this.exposeCamera(gui, settings, state);
+        this.exposeAtmosphere(globeFolder, settings, state);
+    }
 
-        const atmos_folder = globe_folder.addFolder("Atmosphere");
+    exposeCamera(parent, settings, state) {
+        const cameraFolder = parent.addFolder("Camera");
 
+        const zoom = cameraFolder.add(settings.camera, 'zoom');
+        zoom.onChange(function(value) {
+            this.zoom = value;
+            settings.camera.zoom = value;
+            window.dispatchEvent(new Event('resize'));
+        }.bind(state.objects.camera));
+    }
+
+    exposeAtmosphere(parent, settings, state) {
+        const atmosFolder = parent.addFolder("Atmosphere");
 
         exposeUniform(
-            atmos_folder, 'addColor', 'color',
+            atmosFolder, 'addColor', 'color',
             settings.globe.atmosphere, 
             state.objects.globe.material.uniforms.a_color
         );
 
         exposeUniform(
-            atmos_folder, 'add', 'brightness',
+            atmosFolder, 'add', 'brightness',
             settings.globe.atmosphere, 
             state.objects.globe.material.uniforms.a_brightness
         );
 
         exposeUniform(
-            atmos_folder, 'add', 'reflection',
+            atmosFolder, 'add', 'reflection',
             settings.globe.atmosphere,
             state.objects.globe.material.uniforms.a_reflection
         );
 
         exposeUniform(
-            atmos_folder, 'add', 'ray',
+            atmosFolder, 'add', 'ray',
             settings.globe.atmosphere,
             state.objects.globe.material.uniforms.a_ray
         );
 
         exposeUniform(
-            atmos_folder, 'add', 'mie',
+            atmosFolder, 'add', 'mie',
             settings.globe.atmosphere,
             state.objects.globe.material.uniforms.a_mie
         );
 
         exposeUniform(
-            atmos_folder, 'add', 'spread',
+            atmosFolder, 'add', 'spread',
             settings.globe.atmosphere,
             state.objects.globe.material.uniforms.a_spread
         );
 
         exposeUniform(
-            atmos_folder, 'add', 'thick',
+            atmosFolder, 'add', 'thick',
             settings.globe.atmosphere,
             state.objects.globe.material.uniforms.a_thick
         );
 
         exposeUniform(
-            atmos_folder, 'add', 'test',
+            atmosFolder, 'add', 'test',
             settings.globe.atmosphere,
             state.objects.globe.material.uniforms.a_test
         );

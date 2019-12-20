@@ -1,5 +1,5 @@
-import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3, Group, PlaneGeometry } from "three";
-import { RepeatWrapping, Line } from "three";
+import { Matrix4, BufferGeometry, Float32BufferAttribute, RawShaderMaterial, Mesh, TextureLoader, Vector3, Group, PlaneGeometry, Vector2, Sphere } from "three";
+import { RepeatWrapping, Line, Raycaster } from "three";
 
 import SVGLoader from '../aux/svg-loader.js'
 
@@ -37,10 +37,8 @@ export default class Globe extends Mesh {
                 a_thick: { value: settings.atmosphere.thick },
                 a_test: { value: settings.atmosphere.test },
 
-
                 t_day: { type: 't', value: t_day },
                 t_aux: { type: 't', value: t_aux },
-
             },
             vertexShader: sphereVertShader,
             fragmentShader: globeFragShader,
@@ -52,6 +50,73 @@ export default class Globe extends Mesh {
         
         this.onBeforeRender = (renderer, scene, camera, geometry, material) => {
             material.uniforms.invViewMatrix.value = camera.matrixWorld;
+        }
+    }
+
+    onClickDown = (state, event) => {
+        this.start = new Date();
+        if (event.type === "mousedown") {
+            this.mouseStartPos = new Vector2(event.clientX, event.clientY);
+        } else if (event.type === "touchstart") {
+            this.mouseStartPos = new Vector2(event.touches[0].clientX, event.touches[0].clientY);
+        }
+    }
+
+    onClickUp = (state, event) => {
+        if (this.handled) {
+            return;
+        }
+
+        const deltaDate = (new Date() - this.start) / 1000;
+        if (deltaDate > 0.2) {
+            return;
+        }
+
+        const mouseUpPos = new Vector2();
+        if (event.type === "mouseup") {
+            if (event.which != 1) {
+                return;
+            }
+            mouseUpPos.x = event.clientX;
+            mouseUpPos.y = event.clientY;
+        } else if (event.type === "touchend") {
+            mouseUpPos.x = event.changedTouches[0].clientX;
+            mouseUpPos.y = event.changedTouches[0].clientY;
+        } else {
+            throw "Unsupported click event.";    
+        }
+
+        this.handled = true;
+        
+        setTimeout(() => {
+            this.handled = false;
+        }, 500);
+
+
+        const mouseMovedDist = this.mouseStartPos.clone().sub(mouseUpPos).length();
+        if (mouseMovedDist > 10) {
+            return;
+        }
+
+        const rect = event.target.getBoundingClientRect();
+        mouseUpPos.x -= rect.left;
+        mouseUpPos.y -= rect.top;
+
+        mouseUpPos.multiplyScalar(window.devicePixelRatio)
+        
+        mouseUpPos.x =  (mouseUpPos.x / state.canvas.width) * 2 - 1;
+        mouseUpPos.y = -(mouseUpPos.y / state.canvas.height) * 2 + 1;
+        
+        const caster = new Raycaster();
+        caster.setFromCamera(mouseUpPos, state.objects.camera);
+        
+        const globe = state.objects.globe;
+        const sphere = new Sphere(globe.position, globe.material.uniforms.scale.value);
+
+        const hit = caster.ray.intersectsSphere(sphere);
+        
+        if (hit) {
+            state.canvas.fullscreen.toggle();
         }
     }
 

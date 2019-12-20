@@ -1,33 +1,31 @@
 {
   "camera": {
-   "fov": 40,
-   "near": 0.1,
-   "far": 10000,
-   "controls": {
+    "zoom": 0.5,
+    "near": 0.1,
+    "far": 10000,
     "distance": {
-     "start": 5,
-     "min": 4,
-     "max": 10
+      "start": 4,
+      "min": 3,
+      "max": 8
     },
     "damping": 0.05,
     "rotateSpeed": 1
-   }
   },
   "globe": {
-   "scale": 1,
-   "atmosphere": {
-    "color": [
-     89.99999999999999,
-     124.05405405405409,
-     179.99999999999997
-    ],
-    "brightness": 31,
-    "reflection": 0.89,
-    "ray": 30.699999999999932,
-    "mie": 0.000001,
-    "spread": 0.2699999999999997,
-    "thick": 2.5000000000000004,
-    "test": 0.19999999999999976
-   }
+    "scale": 1,
+    "atmosphere": {
+      "color": [
+        90,
+        124,
+        180
+      ],
+      "brightness": 17,
+      "reflection": 0.89,
+      "ray": 20,
+      "mie": 0.000001,
+      "spread": 0.2699999999999999,
+      "thick": 2,
+      "test": 0.2
+    }
   }
- }
+}

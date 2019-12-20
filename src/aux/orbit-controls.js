@@ -29,8 +29,8 @@ var OrbitControls = function ( object, domElement, settings ) {
 	this.target = new Vector3();
 
 	// How far you can dolly in and out ( PerspectiveCamera only )
-	this.minDistance = settings.distance.min;
-	this.maxDistance = settings.distance.max;
+	this.minDistance = settings.distance.min * (1 + (window.devicePixelRatio - 1) / 2);
+	this.maxDistance = settings.distance.max * (1 + (window.devicePixelRatio - 1) / 2);
 
 	// How far you can zoom in and out ( OrthographicCamera only )
 	this.minZoom = 0;
@@ -68,7 +68,7 @@ var OrbitControls = function ( object, domElement, settings ) {
 
 	// Set to true to automatically rotate around the target
 	// If auto-rotate is enabled, you must call controls.update() in your animation loop
-	this.autoRotate = false;
+	this.autoRotate = true;
 	this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60
 
 	// Set to false to disable use of the keys
@@ -140,7 +140,6 @@ var OrbitControls = function ( object, domElement, settings ) {
 		var lastQuaternion = new Quaternion();
 
 		return function update() {
-
 			var position = scope.object.position;
 
 			offset.copy( position ).sub( scope.target );
@@ -235,15 +234,30 @@ var OrbitControls = function ( object, domElement, settings ) {
 				lastQuaternion.copy( scope.object.quaternion );
 				zoomChanged = false;
 
-				return true;
+				return;
 
 			}
-
-			return false;
-
+			return;
 		};
 
 	}();
+
+	this.setListeners = function(enabled) {
+		if (!enabled) {
+			this.dispose();
+		} else {
+			scope.domElement.addEventListener( 'contextmenu', onContextMenu, false );
+
+			scope.domElement.addEventListener( 'mousedown', onMouseDown, false );
+			scope.domElement.addEventListener( 'wheel', onMouseWheel, false );
+		
+			scope.domElement.addEventListener( 'touchstart', onTouchStart, false );
+			scope.domElement.addEventListener( 'touchend', onTouchEnd, false );
+			scope.domElement.addEventListener( 'touchmove', onTouchMove, false );
+		
+			window.addEventListener( 'keydown', onKeyDown, false );
+		}
+	}
 
 	this.dispose = function () {
 
@@ -259,8 +273,6 @@ var OrbitControls = function ( object, domElement, settings ) {
 		document.removeEventListener( 'mouseup', onMouseUp, false );
 
 		window.removeEventListener( 'keydown', onKeyDown, false );
-
-		//scope.dispatchEvent( { type: 'dispose' } ); // should this be added here?
 
 	};
 
@@ -383,78 +395,28 @@ var OrbitControls = function ( object, domElement, settings ) {
 
 			var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
 
-			if ( scope.object.isPerspectiveCamera ) {
+			// perspective
+			var position = scope.object.position;
+			offset.copy( position ).sub( scope.target );
+			var targetDistance = offset.length();
 
-				// perspective
-				var position = scope.object.position;
-				offset.copy( position ).sub( scope.target );
-				var targetDistance = offset.length();
+			// half of the fov is center to top of screen
+			targetDistance *= Math.tan( ( scope.object.fov / 2 ) * Math.PI / 180.0 );
 
-				// half of the fov is center to top of screen
-				targetDistance *= Math.tan( ( scope.object.fov / 2 ) * Math.PI / 180.0 );
-
-				// we use only clientHeight here so aspect ratio does not distort speed
-				panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
-				panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
-
-			} else if ( scope.object.isOrthographicCamera ) {
-
-				// orthographic
-				panLeft( deltaX * ( scope.object.right - scope.object.left ) / scope.object.zoom / element.clientWidth, scope.object.matrix );
-				panUp( deltaY * ( scope.object.top - scope.object.bottom ) / scope.object.zoom / element.clientHeight, scope.object.matrix );
-
-			} else {
-
-				// camera neither orthographic nor perspective
-				console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.' );
-				scope.enablePan = false;
-
-			}
+			// we use only clientHeight here so aspect ratio does not distort speed
+			panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
+			panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
 
 		};
 
 	}();
 
 	function dollyIn( dollyScale ) {
-
-		if ( scope.object.isPerspectiveCamera ) {
-
-			scale /= dollyScale;
-
-		} else if ( scope.object.isOrthographicCamera ) {
-
-			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom * dollyScale ) );
-			scope.object.updateProjectionMatrix();
-			zoomChanged = true;
-
-		} else {
-
-			console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
-			scope.enableZoom = false;
-
-		}
-
+		scale /= dollyScale;
 	}
 
 	function dollyOut( dollyScale ) {
-
-		if ( scope.object.isPerspectiveCamera ) {
-
-			scale *= dollyScale;
-
-		} else if ( scope.object.isOrthographicCamera ) {
-
-			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom / dollyScale ) );
-			scope.object.updateProjectionMatrix();
-			zoomChanged = true;
-
-		} else {
-
-			console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
-			scope.enableZoom = false;
-
-		}
-
+		scale *= dollyScale;
 	}
 
 	//
@@ -1125,21 +1087,7 @@ var OrbitControls = function ( object, domElement, settings ) {
 
 	}
 
-	//
-
-	scope.domElement.addEventListener( 'contextmenu', onContextMenu, false );
-
-	scope.domElement.addEventListener( 'mousedown', onMouseDown, false );
-	scope.domElement.addEventListener( 'wheel', onMouseWheel, false );
-
-	scope.domElement.addEventListener( 'touchstart', onTouchStart, false );
-	scope.domElement.addEventListener( 'touchend', onTouchEnd, false );
-	scope.domElement.addEventListener( 'touchmove', onTouchMove, false );
-
-	window.addEventListener( 'keydown', onKeyDown, false );
-
 	// force an update at start
-
 	this.update();
 
 };
