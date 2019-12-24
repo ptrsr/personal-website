@@ -9,7 +9,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 process.env.NODE_ENV = 'production'
 
 module.exports = {
-    entry: './src/index.js',
+    entry: [ 'babel-polyfill', './src/index.js' ],
     mode: 'production',
 
     output: {

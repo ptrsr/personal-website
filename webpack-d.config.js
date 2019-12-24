@@ -8,7 +8,7 @@ const webpack = require('webpack');
 process.env.NODE_ENV = 'development'
 
 module.exports = {
-    entry: './src/index.js',
+    entry: [ 'babel-polyfill', './src/index.js' ],
     mode: 'development',
 
     output: {

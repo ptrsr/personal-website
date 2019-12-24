@@ -1,4 +1,4 @@
-import { Color, WebGLRenderer, Scene, PerspectiveCamera, Clock, Object3D, Math as TMath, Vector3, Matrix4 } from 'three'
+import { Color, WebGLRenderer, Scene, PerspectiveCamera, Clock, Object3D, Math as TMath, Vector3 } from 'three'
 
 import OrbitControls from '../aux/orbit-controls.js'
 import FPSCounter from '../aux/fps-counter.js'
@@ -8,6 +8,7 @@ import Globe from './globe.js'
 import Sun from './sun.js'
 import CreateStars from './stars.js'
 import Dolly from './dolly.js'
+import Icosphere from './icosphere.js'
 
 function loop(state) {
     if (!state.settings.looping) {
@@ -26,8 +27,6 @@ function loop(state) {
     state.renderer.render(state.scene, state.objects.camera);
     requestAnimationFrame(loop.bind(null, state));
 }
-
-
 
 function init(canvas, settings) {
     // create empty scene
@@ -101,11 +100,7 @@ function onWindowResize(camera, renderer) {
  }
 
 export default class Context {
-    constructor(canvas, settings) {
-
-        // canvas.onmouseout = function() {
-        //     console.log('no')
-        // }
+    constructor(canvas, settings, textures) {
 
         const state = init(canvas, settings);
         state.handler = new EventHandler(canvas, state);
@@ -118,18 +113,21 @@ export default class Context {
         state.scene.add(sun);
 
         // instantiate globe
-        const globe = new Globe(settings.globe);
+        const globe = new Globe(settings.globe, textures);
         
-        state.handler.addListener('mousedown', globe.onClickDown);
-        state.handler.addListener('touchstart', globe.onClickDown);
-        state.handler.addListener('touchend', globe.onClickUp);
-        state.handler.addListener('mouseup', globe.onClickUp);
+        // state.handler.addListener('touchend', globe.onClickUp);
+        // state.handler.addListener('mouseup', globe.onClickUp);
+        
+        const icosphere = new Icosphere(3, 7, textures.aux);
+        icosphere.createBorders('/public/map.svg', state.scene);
+        state.handler.addListener('mousedown', icosphere.onClickDown);
+        state.handler.addListener('touchstart', icosphere.onClickDown);
+        state.scene.add(icosphere);
 
         // state.handler.addListener('touchstart', globe.onClick);
-
         state.scene.add(globe);
         globe.setSunDir(sun.dir);
-        // globe.loadBorders('/public/map.svg');
+
 
         // stars
         state.scene.background = CreateStars(state.renderer, 1500);
