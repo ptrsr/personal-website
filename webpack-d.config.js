@@ -73,8 +73,12 @@ module.exports = {
                 use: ['file-loader']
             },
             {
-                test: /\.(vs|fs)$/,
-                use: 'raw-loader',
+                test: /\.(glsl|vs|fs|vert|frag)$/,
+                exclude: /node_modules/,
+                use: [
+                  'raw-loader',
+                  'glslify-loader'
+                ]
             }
         ]
     }

@@ -8,6 +8,8 @@ uniform mat4 invViewMatrix;
 uniform vec3 cameraPosition;
 
 uniform float scale;
+uniform float a_scale;
+
 
 attribute vec3 position;
 varying vec3 fragPos;
@@ -31,19 +33,19 @@ void main() {
     mat4 modelViewMatrix = viewMatrix * modelMatrix;
 
     // first column
-    modelViewMatrix[0][0] = scale; 
+    modelViewMatrix[0][0] = scale * a_scale; 
     modelViewMatrix[0][1] = 0.0; 
     modelViewMatrix[0][2] = 0.0; 
 
     // second column
     modelViewMatrix[1][0] = 0.0; 
-    modelViewMatrix[1][1] = scale; 
+    modelViewMatrix[1][1] = scale * a_scale;
     modelViewMatrix[1][2] = 0.0; 
 
     // third column
     modelViewMatrix[2][0] = 0.0; 
     modelViewMatrix[2][1] = 0.0; 
-    modelViewMatrix[2][2] = scale; 
+    modelViewMatrix[2][2] = scale * a_scale;
 
     // position of render plane vertex relative to camera
     vec4 viewPos = modelViewMatrix * vec4(position, 1);

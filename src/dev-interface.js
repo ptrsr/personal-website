@@ -17,7 +17,7 @@ function exposeUniform(parent, func, name, settings, parameter) {
 export default class DevInterface {
     constructor(settings, state) {
         const gui = new dat.GUI({ load: settings });
-        gui.toggleHide();
+        gui.close();
 
         gui.add({ Save : saveToClipboard.bind(null, settings) }, 'Save');
 
@@ -51,6 +51,12 @@ export default class DevInterface {
             atmosFolder, 'addColor', 'color',
             settings.globe.atmosphere, 
             state.objects.globe.material.uniforms.a_color
+        );
+
+        exposeUniform(
+            atmosFolder, 'add', 'scale',
+            settings.globe.atmosphere, 
+            state.objects.globe.material.uniforms.a_scale
         );
 
         exposeUniform(

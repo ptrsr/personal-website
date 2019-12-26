@@ -1,12 +1,16 @@
-import { Matrix4, BufferGeometry, RawShaderMaterial, Mesh, Vector3, Group, PlaneGeometry, Vector2, Sphere } from "three";
-import { Line, Raycaster } from "three";
-
+import { 
+    RawShaderMaterial,
+    PlaneGeometry,
+    Mesh,
+    Matrix4,
+    Vector3,
+    Vector2,
+    Sphere,
+    Raycaster
+} from "three";
 
 import sphereVertShader from './shaders/sphere.vs'
 import globeFragShader from './shaders/globe.fs'
-
-import mapVertShader from './shaders/map.vs'
-import mapFragShader from './shaders/map.fs'
 
 
 export default class Globe extends Mesh {
@@ -20,6 +24,7 @@ export default class Globe extends Mesh {
                 invViewMatrix: { value: new Matrix4() },
                 scale: { value: settings.scale },
                 
+                a_scale: { value: settings.atmosphere.scale },
                 a_color: { value: settings.atmosphere.color },
                 a_brightness: { value: settings.atmosphere.brightness },
                 a_reflection: { value: settings.atmosphere.reflection },

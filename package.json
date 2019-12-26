@@ -36,11 +36,12 @@
     "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.7",
-    "webpack-dev-server": "^3.8.0"
-  },
-  "dependencies": {
+    "webpack-dev-server": "^3.8.0",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-preset-env": "^1.7.0",
+    "glslify-loader": "^2.0.0"
+  },
+  "dependencies": {
     "suncalc": "^1.8.0",
     "three": "^0.108.0"
   },

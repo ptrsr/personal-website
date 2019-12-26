@@ -17,6 +17,7 @@ uniform vec3 cameraPosition;
 uniform float scale;
 
 // atmosphere control variables
+uniform float a_scale;
 uniform vec3 a_color;
 uniform float a_brightness;
 uniform float a_reflection;
@@ -42,9 +43,9 @@ vec3 atmosphere(vec3 o, vec3 dir, vec2 e, vec3 l, vec2 diameters);
 
 void main() {
     // diameter of globe
-    float d_inner = scale * .99;
+    float d_inner = scale;
     //diameter of atmosphere
-    float d_outer = scale;
+    float d_outer = scale * a_scale;
 
     // out of screen ray
     vec3 ray = normalize(cameraPosition - fragPos);

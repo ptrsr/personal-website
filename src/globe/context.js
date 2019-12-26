@@ -8,7 +8,7 @@ import Globe from './globe.js'
 import Sun from './sun.js'
 import CreateStars from './stars.js'
 import Dolly from './dolly.js'
-import Icosphere from './icosphere.js'
+import Digital from './digital.js'
 
 function loop(state) {
     if (!state.settings.looping) {
@@ -117,12 +117,12 @@ export default class Context {
         
         // state.handler.addListener('touchend', globe.onClickUp);
         // state.handler.addListener('mouseup', globe.onClickUp);
-        
-        const icosphere = new Icosphere(3, 7, textures.aux);
-        icosphere.createBorders('/public/map.svg', state.scene);
-        state.handler.addListener('mousedown', icosphere.onClickDown);
-        state.handler.addListener('touchstart', icosphere.onClickDown);
-        state.scene.add(icosphere);
+
+
+        const digital = new Digital(3, 13, textures.aux);
+        state.handler.addListener('mousedown', digital.onClickDown);
+        state.handler.addListener('touchstart', digital.onClickDown);
+        state.scene.add(digital);
 
         // state.handler.addListener('touchstart', globe.onClick);
         state.scene.add(globe);

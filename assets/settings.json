@@ -14,6 +14,7 @@
   "globe": {
     "scale": 1,
     "atmosphere": {
+      "scale": 1.01,
       "color": [
         90,
         124,
@@ -23,7 +24,7 @@
       "reflection": 0.89,
       "ray": 20,
       "mie": 0.000001,
-      "spread": 0.2699999999999999,
+      "spread": 0.27,
       "thick": 2,
       "test": 0.2
     }

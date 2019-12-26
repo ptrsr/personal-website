@@ -93,7 +93,7 @@ var OrbitControls = function ( object, domElement, settings ) {
 	// Set to true to automatically rotate around the target
 	// If auto-rotate is enabled, you must call controls.update() in your animation loop
 	this.autoRotate = true;
-	this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60
+	this.autoRotateSpeed = 60.0; // 30 seconds per round when fps is 60
 
 	// Set to false to disable use of the keys
 	this.enableKeys = true;
@@ -153,7 +153,6 @@ var OrbitControls = function ( object, domElement, settings ) {
 
 	// this method is exposed, but perhaps it would be better if we can make it private...
 	this.update = function () {
-
 		var offset = new Vector3();
 
 		// so camera.up is the orbit axis
@@ -163,7 +162,7 @@ var OrbitControls = function ( object, domElement, settings ) {
 		var lastPosition = new Vector3();
 		var lastQuaternion = new Quaternion();
 
-		return function update() {
+		return function update(currentState, delta) {
 			var position = scope.object.position;
 
 			offset.copy( position ).sub( scope.target );
@@ -176,13 +175,12 @@ var OrbitControls = function ( object, domElement, settings ) {
 
 			if ( scope.autoRotate && state === STATE.NONE ) {
 
-				rotateLeft( getAutoRotationAngle() );
+				rotateLeft( getAutoRotationAngle());
 
 			}
 
 			if ( scope.enableDamping ) {
-
-				spherical.theta += sphericalDelta.theta * scope.dampingFactor;
+				spherical.theta += sphericalDelta.theta * scope.dampingFactor * delta;
 				spherical.phi += sphericalDelta.phi * scope.dampingFactor;
 
 			} else {
@@ -1110,10 +1108,6 @@ var OrbitControls = function ( object, domElement, settings ) {
 		event.preventDefault();
 
 	}
-
-	// force an update at start
-	this.update();
-
 };
 
 OrbitControls.prototype = Object.create( EventDispatcher.prototype );
