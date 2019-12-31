@@ -13,6 +13,7 @@ export default class Fullscreen {
     }
 
     toggle = () => {
+        console.log(true)
         this.element.requestFullScreen = this.element.requestFullScreen || this.element.webkitRequestFullScreen || this.element.mozRequestFullScreen || function () { return false; };
         document.cancelFullScreen = document.cancelFullScreen || document.webkitCancelFullScreen || document.mozCancelFullScreen || function () { return false; };
     

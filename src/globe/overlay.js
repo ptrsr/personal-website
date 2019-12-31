@@ -228,6 +228,7 @@ export default class Digital extends Group {
             transparent: true
         });
 
+        
         return new LineSegments(geometry, material);
     }
 }

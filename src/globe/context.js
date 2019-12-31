@@ -6,9 +6,10 @@ import EventHandler from '../aux/event-handler.js'
 
 import Globe from './globe.js'
 import Sun from './sun.js'
-import CreateStars from './stars.js'
 import Dolly from './dolly.js'
-import Digital from './digital.js'
+import Overlay from './overlay.js'
+
+import createStars from './stars.js'
 
 function loop(state) {
     if (!state.settings.looping) {
@@ -18,13 +19,15 @@ function loop(state) {
     const deltaTime = state.clock.getDelta();
     for (let [key, func] of Object.entries(state.updateables)) {
         stop = func(state, deltaTime);
-
+        // remove the updatable function if returns false to stop it from looping
         if (stop === false) {
             delete state.updateables[key];
         }
     };
-
+    // render
     state.renderer.render(state.scene, state.objects.camera);
+
+    // call next loop with current state
     requestAnimationFrame(loop.bind(null, state));
 }
 
@@ -62,6 +65,7 @@ function init(canvas, settings) {
     // auxiliary
     const clock = new Clock(false);
 
+    // context state
     return {
         scene, clock, controls, renderer, canvas,
         objects: {
@@ -72,7 +76,7 @@ function init(canvas, settings) {
             controls: controls.update 
         },
         settings: {
-            background: true,
+            interactive: true,
             looping: false
         }
     }
@@ -83,17 +87,16 @@ function onWindowResize(camera, renderer) {
 
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-
     const mat = camera.projectionMatrix;
 
+    // final zoom is based the shortest canvas dimension length
     const zoom = Math.min(width, height) / camera.zoom;
 
+    // scale the camera projection based on zoom and resolution
     mat.elements[0] = (zoom / width);
     mat.elements[5] = (zoom / height);
 
-    camera.projectionMatrix = mat;
-
-    // this is used for raycasting from screen space
+    // used for raycasting from screen space
     camera.projectionMatrixInverse.getInverse(mat);
 
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
@@ -101,12 +104,15 @@ function onWindowResize(camera, renderer) {
 
 export default class Context {
     constructor(canvas, settings, textures) {
-
+        // create 3D environment
         const state = init(canvas, settings);
+
+        // allows events to access the state
         state.handler = new EventHandler(canvas, state);
 
-        const counter = new FPSCounter(document.body);
-        state.updateables.record = counter.record;
+        // fps
+        const fps = new FPSCounter(document.body);
+        state.updateables.record = fps.record;
 
         // sun
         const sun = new Sun(Date.now());
@@ -118,8 +124,8 @@ export default class Context {
         // state.handler.addListener('touchend', globe.onClickUp);
         // state.handler.addListener('mouseup', globe.onClickUp);
 
-
-        const digital = new Digital(3, 13, textures.aux);
+        // globe overlay
+        const digital = new Overlay(4, 5, textures.aux);
         state.handler.addListener('mousedown', digital.onClickDown);
         state.handler.addListener('touchstart', digital.onClickDown);
         state.scene.add(digital);
@@ -128,38 +134,48 @@ export default class Context {
         state.scene.add(globe);
         globe.setSunDir(sun.dir);
 
-
         // stars
-        state.scene.background = CreateStars(state.renderer, 1500);
+        state.scene.background = createStars(state.renderer, 1500);
 
+        // add globe and sun to objects
         Object.assign(state.objects, { globe, sun });
+
+        // save state in context
         this.state = state;
     }
 
     start = () => {
         this.state.settings.looping = true;
         this.state.clock.start();
+
+        // start looping
         loop(this.state);
     }
 
     stop = () => {
+        // stops after current loop
         this.state.settings.looping = false;
+
         this.state.clock.stop();
     }
 
-    toggleControls(enable) {
-        if (enable == undefined) {
-            enable = !this.state.settings.background;
-        }
-
+    toggleControls(enable = !this.state.settings.interactive) {
+        // save state in settings
+        this.state.settings.interactive = enable;
+        
+        // toggle the input listeners of the controls
         this.state.controls.setListeners(!enable);
 
-        this.state.controls.autoRotate = enable;
+        // set canvas to fore or background
         this.state.canvas.style['z-index'] = enable ? -1 : 0;
 
-        this.state.settings.background = enable;
-
+        // idle rotation when in background
+        this.state.controls.autoRotate = enable;
+        
+        // move the dolly between start and end 
         const dolly = this.state.objects.dolly.goTo(enable ? 1 : 0);
+
+        // dolly animation if movement is required
         if (Boolean(dolly)) {
             this.state.updateables.dolly = dolly;
         }

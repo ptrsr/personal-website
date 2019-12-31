@@ -162,7 +162,7 @@ var OrbitControls = function ( object, domElement, settings ) {
 		var lastPosition = new Vector3();
 		var lastQuaternion = new Quaternion();
 
-		return function update(currentState, delta) {
+		return function update(currentState, delta = (1 / 60)) {
 			var position = scope.object.position;
 
 			offset.copy( position ).sub( scope.target );
@@ -181,7 +181,7 @@ var OrbitControls = function ( object, domElement, settings ) {
 
 			if ( scope.enableDamping ) {
 				spherical.theta += sphericalDelta.theta * scope.dampingFactor * delta;
-				spherical.phi += sphericalDelta.phi * scope.dampingFactor;
+				spherical.phi += sphericalDelta.phi * scope.dampingFactor * delta;
 
 			} else {
 

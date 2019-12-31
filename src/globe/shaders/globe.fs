@@ -9,7 +9,6 @@ precision highp float;
 #define SCALE_MULTI 6.0
 
 uniform mat4 modelMatrix;
-uniform mat4 invViewMatrix;
 
 uniform vec3 sunLightDir;
 uniform vec3 cameraPosition;

@@ -20,6 +20,10 @@ const fullscreen = new Fullscreen(header, onFullscreenChange);
 const canvas = document.getElementById('globe');
 canvas.fullscreen = fullscreen;
 
+const fullscreenButton = document.getElementById('fullscreen');
+fullscreenButton.onclick = fullscreen.toggle;
+
+
 // textures
 const loader = new TextureLoader();
 

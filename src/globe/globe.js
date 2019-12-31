@@ -15,6 +15,7 @@ import globeFragShader from './shaders/globe.fs'
 
 export default class Globe extends Mesh {
     constructor(settings, textures) {
+        // globe is rendered in screen space on a plane using raycasting in the fragment shader
         const geometry = new PlaneGeometry(2, 2);
 
         // globe shader
@@ -45,6 +46,7 @@ export default class Globe extends Mesh {
         // mesh constructor
         super(geometry, material);
         
+        // pass camera local transform to shader
         this.onBeforeRender = (renderer, scene, camera, geometry, material) => {
             material.uniforms.invViewMatrix.value = camera.matrixWorld;
         }
